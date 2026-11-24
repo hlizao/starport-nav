@@ -1,5 +1,5 @@
 <?php
-// 星港导航 · 认证接口（账号唯一 + 账号锁定 + IP 级限速 + CSRF/同源校验 + 安全审计）
+// 星港导航 · 认证接口（账号唯一 + 账号锁定 + IP 级限速 + CSRF/同源校验 + 密码信封加密 + 安全审计）
 require __DIR__ . '/config.php';
 
 // GET ?action=status —— 查询当前登录状态，并下发会话绑定 CSRF 令牌
@@ -12,6 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'status'
         'role'   => $_SESSION['role'] ?? null,
         'csrf'   => csrf_token(),
     ]);
+}
+
+// GET ?action=pubkey —— 下发会话级 RSA 公钥（前端用于加密登录密码）
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'pubkey') {
+    start_session();
+    $pub = rsa_public_key();
+    if ($pub === '') {
+        json_out(['ok' => false, 'error' => 'crypto-unavailable', 'msg' => '加密组件不可用，请联系管理员'], 500);
+    }
+    json_out(['ok' => true, 'pubkey' => $pub]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,9 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'login') {
         start_session();
         check_csrf(); // 登录请求同样校验 CSRF（前端启动时先 GET status 获取令牌），防跨站登录伪造
-        $u  = trim((string)($body['user'] ?? ''));
-        $p  = (string)($body['pass'] ?? '');
-        $ip = client_ip();
+        $u   = trim((string)($body['user'] ?? ''));
+        $enc = (string)($body['pass_enc'] ?? '');
+        $ip  = client_ip();
 
         // ---- IP 级限速：锁定期间直接拒绝，防横向撞库/账号枚举 ----
         [, $lockedUntil] = ip_guard_state($ip);
@@ -47,6 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'ip_locked'      => true,
                 'locked_seconds' => $ipLockedRemaining,
             ], 429);
+        }
+
+        // ---- 密码信封解密：只接受会话公钥加密的密文，缺失/无效按登录失败处理（不泄露细节）----
+        $p = rsa_decrypt_password($enc);
+        if ($p === null) {
+            ip_register_fail($ip);
+            usleep(300000);
+            audit_log('login_fail', '', 'user=' . mb_substr($u, 0, 32) . ' reason=no-cipher');
+            json_out(['ok' => false, 'error' => 'bad-credentials'], 401);
         }
 
         // 账号唯一：按用户名精确匹配（数据库 UNIQUE 索引保证唯一性）
@@ -78,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare('UPDATE nav_admin SET failed_count = 0, locked_until = 0 WHERE id = ?')
                 ->execute([$row['id']]);
             ip_clear($ip);
+            rsa_drop_keypair(); // 销毁会话临时密钥对：密文不可重放
             session_regenerate_id(true); // 防会话固定攻击（保留会话数据，含 CSRF 令牌）
             $_SESSION['fails']    = 0;
             $_SESSION['admin']    = $row['username'];

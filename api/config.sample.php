@@ -1,8 +1,5 @@
 <?php
-// 星港导航 · 配置模板
-// 使用方法：将本文件复制为 config.php，并填入你所在主机的数据库连接信息与站点域名
-// 注意：config.php 含有数据库凭据，切勿提交到公开仓库（项目已默认在 .gitignore 中排除）
-// 本文件同时定义全站安全机制：CSRF 令牌、同源校验、IP 级登录限速、审计日志、会话空闲超时、密码策略
+// 星港导航 · 配置模板：复制本文件为 config.php 并填入数据库连接信息与站点域名（config.php 已在 .gitignore 排除）
 declare(strict_types=1);
 
 const DB_HOST = '127.0.0.1';
@@ -16,7 +13,7 @@ const SESSION_IDLE_TIMEOUT = 1800;   // 会话空闲超时（秒）：30 分钟�
 const IP_FAIL_WINDOW       = 900;    // IP 级失败统计窗口（秒）：15 分钟
 const IP_FAIL_THRESHOLD    = 20;     // 窗口内最多允许的登录失败次数（含账号不存在的尝试）
 const IP_LOCK_SECONDS      = 900;    // 触发阈值后 IP 被锁定时长（秒）：15 分钟
-const ALLOWED_ORIGIN       = 'https://your-domain.example'; // 同源校验基准：改成你的站点域名（写操作强制比对）
+const ALLOWED_ORIGIN       = 'https://your-domain.example'; // 同源校验基准：改成实际站点域名（写操作强制比对）
 
 function db(): PDO {
     static $pdo = null;
@@ -37,7 +34,7 @@ function client_ip(): string {
 }
 
 /* ============ 安全审计 ============ */
-/* 关键安全事件落库（nav_audit 表）：登录成功/失败、账号/IP 锁定、账号增删改密、登出 */
+/* 关键安全事件落库（nav_audit）：登录成功/失败、账号/IP 锁定、账号增删改密、登出 */
 function audit_log(string $action, string $actor = '', string $detail = ''): void {
     try {
         db()->prepare('INSERT INTO nav_audit (ts, actor, ip, action, detail) VALUES (?, ?, ?, ?, ?)')
@@ -159,7 +156,7 @@ function check_csrf(): void {
 }
 
 /* ============ IP 级登录限速（防横向撞库/账号枚举） ============ */
-/* 依赖 nav_ipguard 表（ip, fails, locked_until, last_attempt） */
+/* 返回 [窗口内失败次数, 锁定截止时间]；锁定独立计时，窗口过期自动清零计数 */
 function ip_guard_state(string $ip): array {
     $st = db()->prepare('SELECT fails, locked_until, last_attempt FROM nav_ipguard WHERE ip = ?');
     $st->execute([$ip]);
@@ -174,6 +171,7 @@ function ip_guard_state(string $ip): array {
     return [$fails, $lockedUntil];
 }
 
+/* 记一次失败；达到阈值写入 IP 锁定并审计 */
 function ip_register_fail(string $ip): void {
     [$fails, $lockedUntil] = ip_guard_state($ip);
     $fails += 1;
@@ -186,8 +184,48 @@ function ip_register_fail(string $ip): void {
     }
 }
 
+/* 登录成功后清除该 IP 的限速记录 */
 function ip_clear(string $ip): void {
     db()->prepare('DELETE FROM nav_ipguard WHERE ip = ?')->execute([$ip]);
+}
+
+/* ============ 登录密码信封加密（会话级 RSA 密钥对） ============ */
+/* 前端用 GET auth.php?action=pubkey 拿到的公钥（PKCS#1 v1.5）加密密码，服务端用会话内私钥解密。
+   作用：请求体中不再出现明文密码（与 TLS 叠加的纵深防御）；密文与会话密钥对绑定，
+   在同一会话内被截获的密文重放到其他会话会因解密失败而无效。 */
+function rsa_ensure_keypair(): array {
+    if (empty($_SESSION['rsa_pub']) || empty($_SESSION['rsa_priv'])) {
+        $res = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+        if ($res === false) return ['', ''];
+        $priv = '';
+        if (!openssl_pkey_export($res, $priv)) return ['', ''];
+        $details = openssl_pkey_get_details($res);
+        if (!$details || empty($details['key'])) return ['', ''];
+        $_SESSION['rsa_pub']  = $details['key'];
+        $_SESSION['rsa_priv'] = $priv;
+    }
+    return [(string)$_SESSION['rsa_pub'], (string)$_SESSION['rsa_priv']];
+}
+
+function rsa_public_key(): string {
+    [$pub] = rsa_ensure_keypair();
+    return $pub;
+}
+
+/* 解密前端提交的密码密文（base64）；失败返回 null，调用方按登录失败处理 */
+function rsa_decrypt_password(string $b64): ?string {
+    if ($b64 === '' || empty($_SESSION['rsa_priv'])) return null;
+    $raw = base64_decode($b64, true);
+    if ($raw === false || $raw === '' || strlen($raw) > 512) return null;
+    $plain = '';
+    if (!openssl_private_decrypt($raw, $plain, $_SESSION['rsa_priv'])) return null;
+    if (!is_string($plain) || $plain === '' || strlen($plain) > 200) return null;
+    return $plain;
+}
+
+/* 登录成功后销毁会话内临时密钥对，收缩密文重放面 */
+function rsa_drop_keypair(): void {
+    unset($_SESSION['rsa_pub'], $_SESSION['rsa_priv']);
 }
 
 function read_json_body(): array {
