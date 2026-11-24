@@ -58,6 +58,16 @@
   .tbtn.active{color:var(--ink);border-color:rgba(74,222,222,.55);background:rgba(74,222,222,.10)}
   .reset{display:none}
   body.editing .reset{display:inline-block}
+  .auth-only{display:none}
+  body.logged .auth-only{display:inline-block}
+  .user-chip{display:none;align-items:center;gap:6px;color:var(--cyan);font-size:12px;padding:0 8px;font-family:var(--mono);letter-spacing:.1em}
+  body.logged .user-chip{display:flex}
+  #loginBtn{display:inline-block}
+  body.logged #loginBtn{display:none}
+  #logoutBtn{display:none}
+  body.logged #logoutBtn{display:inline-block}
+  .keep{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin:-2px 0 12px;cursor:pointer}
+  .login-err{color:#F87171;font-size:12.5px;min-height:18px;margin:0 0 4px}
 
   main{max-width:1160px;width:100%;margin:0 auto;padding:0 28px;flex:1}
 
@@ -256,11 +266,14 @@
         <div class="brand-en">STARPORT</div>
       </div>
     </div>
-    <div class="toolbar">
-      <button type="button" class="tbtn" id="noteBtn">便签<span id="noteDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span></button>
-      <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
-      <button type="button" class="tbtn" id="editBtn">编辑</button>
-    </div>
+      <div class="toolbar">
+        <span class="user-chip" id="userChip">◈ admin</span>
+        <button type="button" class="tbtn auth-only" id="noteBtn">便签<span id="noteDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span></button>
+        <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
+        <button type="button" class="tbtn auth-only" id="editBtn">编辑</button>
+        <button type="button" class="tbtn" id="loginBtn">登录</button>
+        <button type="button" class="tbtn" id="logoutBtn">退出</button>
+      </div>
   </header>
 
   <main>
@@ -318,6 +331,25 @@
   </form>
 </div>
 
+<div class="overlay" id="loginOverlay" hidden>
+  <form class="dialog" id="loginForm" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <h3 id="loginTitle">管理员登录</h3>
+    <div class="field" id="lWrapUser">
+      <label for="lUser">账号</label>
+      <input id="lUser" type="text" placeholder="账号" autocomplete="username">
+    </div>
+    <div class="field" id="lWrapPass">
+      <label for="lPass">密码</label>
+      <input id="lPass" type="password" placeholder="密码" autocomplete="current-password">
+    </div>
+    <p class="login-err" id="loginErr" role="alert"></p>
+    <div class="dlg-actions">
+      <button type="button" class="dlg-cancel" id="loginCancel">取消</button>
+      <button type="submit" class="dlg-save">登录</button>
+    </div>
+  </form>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -371,11 +403,10 @@ function uid(){return 'l'+Date.now().toString(36)+Math.random().toString(36).sli
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 /* ================= 状态 ================= */
-var linksRaw=store.get('starport.links.v1',null);
-var links=Array.isArray(linksRaw)?linksRaw:DEFAULT_LINKS.map(function(x){return {
+/* 数据以服务端为准：先渲染默认数据，加载成功后由服务端数据覆盖 */
+var links=DEFAULT_LINKS.map(function(x){return {
   id:uid(),name:x.name,url:x.url,domain:x.domain,group:x.group,c1:x.c1,c2:x.c2
 };});
-links.forEach(function(x){if(!x.id)x.id=uid();});
 var engineIdx=Math.min(Math.max(0,store.get('starport.engine',0)),ENGINES.length-1);
 var editing=false;
 
@@ -388,9 +419,17 @@ var groupsEl=$('groups'),enginesEl=$('engines'),input=$('searchInput'),
     overlay=$('overlay'),dlgForm=$('dlgForm'),dlgTitle=$('dlgTitle'),
     fName=$('fName'),fUrl=$('fUrl'),fGroup=$('fGroup'),
     fWrapName=$('fWrapName'),fWrapUrl=$('fWrapUrl'),
-    toastEl=$('toast'),searchForm=$('searchForm');
+    toastEl=$('toast'),searchForm=$('searchForm'),
+    loginBtn=$('loginBtn'),logoutBtn=$('logoutBtn'),
+    loginOverlay=$('loginOverlay'),loginForm=$('loginForm'),
+    lUser=$('lUser'),lPass=$('lPass'),loginErr=$('loginErr'),lWrapPass=$('lWrapPass');
 
-function persist(){store.set('starport.links.v1',links);}
+function persist(){
+  api('links.php',{method:'POST',body:{links:links}}).then(function(d){
+    if(d&&d.ok)return;
+    showToast(d&&d.error==='unauthorized'?'登录已过期，请重新登录':'保存失败，请重试');
+  }).catch(function(){showToast('网络异常，保存失败');});
+}
 function persistEngine(){store.set('starport.engine',engineIdx);}
 
 /* ================= 时钟 ================= */
@@ -426,8 +465,8 @@ searchForm.addEventListener('submit',function(e){
   e.preventDefault();
   var q=input.value.trim();if(!q)return;
   var isUrl=/^https?:\/\/\S+$/i.test(q)||/^[\w-]+(\.[\w-]+)+(:\d+)?(\/\S*)?$/.test(q);
-  if(isUrl){location.href=/^https?:\/\//i.test(q)?q:('https://'+q);return;}
-  location.href=ENGINES[engineIdx].url.replace('%s',encodeURIComponent(q));
+  var target=isUrl?(/^https?:\/\//i.test(q)?q:('https://'+q)):ENGINES[engineIdx].url.replace('%s',encodeURIComponent(q));
+  window.open(target,'_blank','noopener');
 });
 
 /* ================= 渲染分组 ================= */
@@ -547,24 +586,93 @@ function removeLink(id){
 /* ================= 便签 ================= */
 var noteTimer=null;
 function updateNoteDot(){
-  var has=noteText.value.trim().length>0;
+  var has=logged&&noteText.value.trim().length>0;
   noteDot.style.display=(has&&!notePanel.classList.contains('open'))?'block':'none';
 }
-function openNote(){notePanel.classList.add('open');updateNoteDot();setTimeout(function(){noteText.focus();},30);}
+function openNote(){notePanel.classList.add('open');updateNoteDot();loadNote();setTimeout(function(){noteText.focus();},30);}
 function closeNote(){notePanel.classList.remove('open');updateNoteDot();}
 noteBtn.addEventListener('click',function(){
   if(notePanel.classList.contains('open'))closeNote();else openNote();
 });
 noteClose.addEventListener('click',closeNote);
-noteText.value=store.get('starport.note','');
+function loadNote(){
+  api('note.php').then(function(d){
+    if(d&&d.ok&&document.activeElement!==noteText){noteText.value=d.note||'';}
+    updateNoteDot();
+  }).catch(function(){});
+}
 noteText.addEventListener('input',function(){
   clearTimeout(noteTimer);
   noteTimer=setTimeout(function(){
-    store.set('starport.note',noteText.value);
+    api('note.php',{method:'POST',body:{note:noteText.value}})
+      .then(function(d){if(!d||!d.ok)showToast('便签保存失败');})
+      .catch(function(){showToast('便签保存失败');});
     updateNoteDot();
-  },250);
+  },800);
 });
 updateNoteDot();
+
+/* ================= 登录门禁（编辑权限，服务端鉴权） ================= */
+/* 账号密码存于服务端数据库（nav_admin 表，bcrypt 哈希），页面源码不含任何凭据。
+   修改密码：SSH 登录服务器后执行
+   php -r "echo password_hash('新密码', PASSWORD_BCRYPT);"
+   然后把输出的哈希写入数据库：
+   UPDATE nav_admin SET pass_hash='<新哈希>' WHERE id=1;（可通过面板 phpMyAdmin 或一次性 PHP 脚本执行） */
+var API='api/';
+var logged=false;
+function api(path,opts){
+  opts=opts||{};
+  opts.headers=Object.assign({'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},opts.headers||{});
+  if(opts.body&&typeof opts.body!=='string')opts.body=JSON.stringify(opts.body);
+  return fetch(API+path,opts).then(function(r){return r.json();});
+}
+function applyAuth(){
+  document.body.classList.toggle('logged',logged);
+  if(!logged){
+    if(editing){
+      editing=false;
+      document.body.classList.remove('editing');
+      editBtn.textContent='编辑';
+      editBtn.classList.remove('active');
+    }
+    notePanel.classList.remove('open');
+  }
+  updateNoteDot();
+}
+function closeLogin(){loginOverlay.hidden=true;}
+loginBtn.addEventListener('click',function(){
+  loginErr.textContent='';lPass.value='';
+  loginOverlay.hidden=false;
+  setTimeout(function(){lUser.focus();},30);
+});
+$('loginCancel').addEventListener('click',closeLogin);
+loginOverlay.addEventListener('click',function(e){if(e.target===loginOverlay)closeLogin();});
+loginForm.addEventListener('submit',function(e){
+  e.preventDefault();
+  var u=lUser.value.trim(),p=lPass.value;
+  if(!u||!p){loginErr.textContent='请输入账号和密码';return;}
+  loginErr.textContent='正在验证…';
+  api('auth.php',{method:'POST',body:{action:'login',user:u,pass:p}}).then(function(d){
+    if(d&&d.ok){
+      logged=true;
+      applyAuth();closeLogin();
+      lPass.value='';lUser.value='';
+      showToast('登录成功，编辑与便签已解锁');
+      loadNote();
+    }else if(d&&d.error==='locked'){
+      loginErr.textContent='尝试过于频繁，请 60 秒后再试';
+    }else{
+      loginErr.textContent='账号或密码不正确';
+      lWrapPass.classList.add('err');
+      setTimeout(function(){lWrapPass.classList.remove('err');},700);
+    }
+  }).catch(function(){loginErr.textContent='网络异常，请稍后重试';});
+});
+logoutBtn.addEventListener('click',function(){
+  api('auth.php',{method:'POST',body:{action:'logout'}}).catch(function(){});
+  logged=false;applyAuth();
+  showToast('已退出登录');
+});
 
 /* ================= 键盘 ================= */
 function isTyping(t){
@@ -574,7 +682,8 @@ document.addEventListener('keydown',function(e){
   if(e.key==='/'&&!isTyping(e.target)){e.preventDefault();input.focus();}
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='k'){e.preventDefault();input.focus();}
   if(e.key==='Escape'){
-    if(!overlay.hidden){closeDialog();}
+    if(!loginOverlay.hidden){closeLogin();}
+    else if(!overlay.hidden){closeDialog();}
     else if(notePanel.classList.contains('open')){closeNote();}
     else if(document.activeElement===input){input.value='';input.blur();}
   }
@@ -620,8 +729,19 @@ window.addEventListener('mousemove',function(e){mx=e.clientX/W-.5;my=e.clientY/H
 if(REDUCED){paint();}else{loop();}
 
 /* ================= 启动 ================= */
+function loadServerState(){
+  api('links.php').then(function(d){
+    if(d&&d.ok&&Array.isArray(d.links)&&d.links.length){links=d.links;render();}
+  }).catch(function(){});
+  api('auth.php?action=status').then(function(d){
+    if(d&&d.ok&&d.logged){logged=true;applyAuth();loadNote();}
+  }).catch(function(){});
+}
+logged=false;
+applyAuth();
 renderChips();
 render();
+loadServerState();
 })();
 </script>
 </body>
