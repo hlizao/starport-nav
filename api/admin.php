@@ -82,6 +82,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         json_out(['ok' => true, 'unlocked' => $st->rowCount() > 0]);
     }
 
+    // 修改用户权限（角色切换）：不允许改自己的角色；不允许把最后一个管理员降级
+    if ($action === 'change_role') {
+        $id   = (int)($body['id'] ?? 0);
+        $role = (string)($body['role'] ?? '');
+        if ($role !== 'user' && $role !== 'admin') {
+            json_out(['ok' => false, 'error' => 'bad-role', 'msg' => '角色值非法'], 400);
+        }
+        $row = db()->prepare('SELECT id, username, role FROM nav_admin WHERE id = ?');
+        $row->execute([$id]);
+        $target = $row->fetch(PDO::FETCH_ASSOC);
+        if (!$target) {
+            json_out(['ok' => false, 'error' => 'not-found'], 404);
+        }
+        if ($target['username'] === $_SESSION['admin']) {
+            json_out(['ok' => false, 'error' => 'self-role', 'msg' => '不能修改当前登录账号的角色'], 400);
+        }
+        if ($target['role'] === $role) {
+            json_out(['ok' => false, 'error' => 'same-role', 'msg' => '目标账号已是该角色'], 400);
+        }
+        // 降级保护：目标是目前唯一的管理员时，不允许降为普通用户（避免系统失去所有管理员）
+        if ($target['role'] === 'admin' && $role === 'user') {
+            $adminCount = (int)db()->query("SELECT COUNT(*) FROM nav_admin WHERE role = 'admin'")->fetchColumn();
+            if ($adminCount <= 1) {
+                json_out(['ok' => false, 'error' => 'last-admin', 'msg' => '至少保留一个管理员'], 400);
+            }
+        }
+        db()->prepare('UPDATE nav_admin SET role = ? WHERE id = ?')->execute([$role, $id]);
+        audit_log('change_role', $_SESSION['admin'],
+            'target=' . $target['username'] . ' role=' . ($target['role'] ?: 'user') . '->' . $role);
+        json_out(['ok' => true, 'target' => $target['username'], 'role' => $role]);
+    }
+
     // 删除账号：不允许删除当前登录账号、不允许删除最后一个账号；同时清理该用户的个人数据
     if ($action === 'delete') {
         $id = (int)($body['id'] ?? 0);

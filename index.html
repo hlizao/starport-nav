@@ -261,6 +261,46 @@
   .acct-role{font-family:var(--mono);font-size:9.5px;color:var(--violet);border:1px solid rgba(167,139,250,.4);border-radius:99px;padding:1px 7px;letter-spacing:.08em}
   .acct-role.user{color:var(--ink-3);border-color:var(--line)}
 
+  /* ---------- audit log panel ---------- */
+  .log-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none}
+  .log-filter{
+    background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:var(--ink);
+    font-size:12.5px;height:32px;padding:0 10px;outline:none;font-family:var(--sans);max-width:52%;flex:none;
+  }
+  .log-filter:focus{border-color:rgba(74,222,222,.5)}
+  .log-scope{
+    flex:1;min-width:0;text-align:right;font-family:var(--mono);font-size:10px;color:var(--ink-3);
+    border:1px dashed var(--line);border-radius:99px;padding:3px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  body.role-admin .log-scope{display:none}
+  .log-item{
+    display:flex;align-items:flex-start;gap:11px;padding:9px 12px;border-radius:12px;
+    border:1px solid transparent;transition:background .15s,border-color .15s;
+  }
+  .log-item:hover{background:var(--card-hover);border-color:var(--line)}
+  .log-ico{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:13px;margin-top:1px}
+  .log-ico.ok{color:#34D399;background:rgba(52,211,153,.12);box-shadow:inset 0 0 0 1px rgba(52,211,153,.25)}
+  .log-ico.err{color:#F87171;background:rgba(248,113,113,.12);box-shadow:inset 0 0 0 1px rgba(248,113,113,.25)}
+  .log-ico.info{color:var(--cyan);background:rgba(74,222,222,.10);box-shadow:inset 0 0 0 1px rgba(74,222,222,.22)}
+  .log-ico.act{color:#818CF8;background:rgba(129,140,248,.12);box-shadow:inset 0 0 0 1px rgba(129,140,248,.25)}
+  .log-meta{min-width:0;flex:1;display:flex;flex-direction:column}
+  .log-line1{font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .log-what{font-weight:600;font-size:12.5px}
+  .log-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;border-radius:99px;padding:1px 8px;flex:none}
+  .log-tag.ok{color:#34D399;border:1px solid rgba(52,211,153,.4)}
+  .log-tag.err{color:#F87171;border:1px solid rgba(248,113,113,.4)}
+  .log-tag.info{color:var(--cyan);border:1px solid rgba(74,222,222,.4)}
+  .log-tag.act{color:#A5B4FC;border:1px solid rgba(167,139,250,.4)}
+  .log-actor{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+  .log-actor b{color:var(--ink-3);font-weight:400}
+  .log-detail{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:2px;word-break:break-all}
+  .log-time{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);flex:none;text-align:right;margin-top:2px;line-height:1.5}
+  .log-page{display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 0 2px;flex:none}
+  .log-pbtn{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink-2);border-radius:9px;font-size:12px;padding:5px 13px;cursor:pointer;font-family:var(--sans)}
+  .log-pbtn:hover:not(:disabled){color:var(--ink);border-color:var(--line-strong)}
+  .log-pbtn:disabled{opacity:.35;cursor:default}
+  .log-pno{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+
   /* ---------- dialog ---------- */
   .overlay{
     position:fixed;inset:0;background:rgba(4,8,18,.62);backdrop-filter:blur(4px);
@@ -342,6 +382,7 @@
         <button type="button" class="tbtn auth-only" id="noteBtn">便签<span id="noteDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span></button>
         <button type="button" class="tbtn auth-only" id="bmBtn">书签</button>
         <button type="button" class="tbtn admin-only" id="acctBtn">账号</button>
+        <button type="button" class="tbtn auth-only" id="logBtn">日志</button>
         <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
         <button type="button" class="tbtn auth-only" id="editBtn">编辑</button>
         <button type="button" class="tbtn" id="loginBtn">登录</button>
@@ -447,6 +488,35 @@
     <button type="button" class="bk-close" id="acctClose" aria-label="关闭账号管理">✕</button>
   </div>
   <div class="bk-list" id="acctList"></div>
+</aside>
+
+<aside class="bk" id="logPanel" aria-label="日志审计">
+  <div class="bk-head">
+    <span class="bk-title">日志审计</span>
+    <span class="bk-count" id="logCount">0</span>
+    <button type="button" class="bk-close" id="logClose" aria-label="关闭日志审计">✕</button>
+  </div>
+  <div class="log-bar">
+    <select class="log-filter" id="logFilter" aria-label="按类型筛选">
+      <option value="">全部类型</option>
+      <option value="login_ok">登录成功</option>
+      <option value="login_fail">登录失败</option>
+      <option value="logout">退出登录</option>
+      <option value="create_user">创建账号</option>
+      <option value="delete_user">删除账号</option>
+      <option value="change_role">修改权限</option>
+      <option value="change_pass">修改密码</option>
+      <option value="unlock">解锁账号</option>
+      <option value="lock">锁定与拦截</option>
+    </select>
+    <span class="log-scope" id="logScope">仅显示与你相关的操作记录</span>
+  </div>
+  <div class="bk-list" id="logList"></div>
+  <div class="log-page">
+    <button type="button" class="log-pbtn" id="logPrev">‹ 上一页</button>
+    <span class="log-pno" id="logPageNo">1 / 1</span>
+    <button type="button" class="log-pbtn" id="logNext">下一页 ›</button>
+  </div>
 </aside>
 
 <div class="overlay" id="acctOverlay" hidden>
@@ -588,7 +658,10 @@ var groupsEl=$('groups'),enginesEl=$('engines'),input=$('searchInput'),
     acctOverlay=$('acctOverlay'),acctForm=$('acctForm'),acctDlgTitle=$('acctDlgTitle'),
     aUser=$('aUser'),aPass=$('aPass'),aPass2=$('aPass2'),aRole=$('aRole'),
     aWrapUser=$('aWrapUser'),aWrapPass=$('aWrapPass'),aWrapPass2=$('aWrapPass2'),aWrapRole=$('aWrapRole'),
-    pwMeter=$('pwMeter'),acctErr=$('acctErr'),pageChip=$('pageChip');
+    pwMeter=$('pwMeter'),acctErr=$('acctErr'),pageChip=$('pageChip'),
+    logBtn=$('logBtn'),logPanel=$('logPanel'),logList=$('logList'),logCount=$('logCount'),
+    logFilter=$('logFilter'),logScope=$('logScope'),logPrev=$('logPrev'),logNext=$('logNext'),
+    logPageNo=$('logPageNo'),logCloseEl=$('logClose');
 
 function persist(){
   api('links.php',{method:'POST',body:{links:links}}).then(function(d){
@@ -821,6 +894,7 @@ function applyAuth(){
     bmOverlay.hidden=true;
     acctPanel.classList.remove('open');
     acctOverlay.hidden=true;
+    logPanel.classList.remove('open');
   }
   updateNoteDot();
 }
@@ -1056,6 +1130,7 @@ function renderAccounts(){
       +'<span class="acct-status '+statusCls+'">'+lockTxt+'</span>'
       +'<span class="acct-acts">'
       +(a.locked?'<button type="button" class="bk-act" data-act="unlock" data-id="'+a.id+'">解锁</button>':'')
+      +(self?'':'<button type="button" class="bk-act" data-act="role" data-id="'+a.id+'" data-user="'+esc(a.username)+'" data-role="'+(isAdmin?'user':'admin')+'">'+(isAdmin?'设为普通用户':'设为管理员')+'</button>')
       +'<button type="button" class="bk-act" data-act="pass" data-id="'+a.id+'" data-user="'+esc(a.username)+'">改密</button>'
       +(self?'':'<button type="button" class="bk-act" data-act="del" data-id="'+a.id+'" data-user="'+esc(a.username)+'">删除</button>')
       +'</span></div>';
@@ -1110,6 +1185,14 @@ acctList.addEventListener('click',function(e){
     api('admin.php',{method:'POST',body:{action:'unlock',id:id}}).then(function(d){
       if(d&&d.ok){loadAccounts();showToast('账号「'+user+'」已解锁');}
     }).catch(function(){});
+  }else if(act==='role'){
+    var toAdmin=btn.dataset.role==='admin';
+    if(confirm('将账号「'+user+'」设为'+(toAdmin?'管理员':'普通用户')+'？')){
+      api('admin.php',{method:'POST',body:{action:'change_role',id:id,role:toAdmin?'admin':'user'}}).then(function(d){
+        if(d&&d.ok){loadAccounts();showToast('账号「'+user+'」已设为'+(toAdmin?'管理员':'普通用户'));}
+        else{showToast((d&&d.msg)||'修改失败');}
+      }).catch(function(){showToast('网络异常，请重试');});
+    }
   }else if(act==='pass'){
     acctDlgMode='pass';acctEditId=id;acctPwUser=user;
     acctDlgTitle.textContent='修改密码 · '+user;
@@ -1128,6 +1211,72 @@ acctList.addEventListener('click',function(e){
   }
 });
 
+/* ================= 日志审计（登录后可用：管理员见全部，普通用户仅本人） ================= */
+var LOG_PAGES=1,LOG_PAGE=1;
+var ACTION_CN={
+  login_ok:      ['登录成功','ok','✓'],
+  login_fail:    ['登录失败','err','✕'],
+  logout:        ['退出登录','info','⏏'],
+  create_user:   ['创建账号','act','＋'],
+  delete_user:   ['删除账号','act','－'],
+  change_role:   ['修改权限','act','⇄'],
+  change_pass:   ['修改密码','act','-key'],
+  unlock:        ['解锁账号','info','🔓'],
+  ip_locked:     ['IP 触发锁定','err','⛔'],
+  ip_blocked:    ['IP 锁定拦截','err','⛔'],
+  account_locked:  ['账号锁定','err','🔒'],
+  account_blocked: ['账号锁定拦截','err','🔒']
+};
+ACTION_CN.change_pass[2]='🔑';
+function fmtTs(ts){
+  var d=new Date(ts*1000),p=function(n){return (n<10?'0':'')+n;};
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+function loadLogs(page){
+  page=Math.max(1,page||1);
+  var f=logFilter.value;
+  api('logs.php?page='+page+'&size=50'+(f?'&action='+encodeURIComponent(f):'')).then(function(d){
+    if(!d||!d.ok)return;
+    LOG_PAGES=d.pages||1;LOG_PAGE=d.page||1;
+    logCount.textContent=d.total||0;
+    renderLogs(d.logs||[]);
+    logPageNo.textContent=LOG_PAGE+' / '+LOG_PAGES;
+    logPrev.disabled=LOG_PAGE<=1;
+    logNext.disabled=LOG_PAGE>=LOG_PAGES;
+  }).catch(function(){logList.innerHTML='<p class="bk-empty">日志加载失败，请稍后重试</p>';});
+}
+function renderLogs(logs){
+  if(!logs.length){
+    logList.innerHTML='<p class="bk-empty">'+(logFilter.value?'没有该类型的日志记录':'暂无日志记录')+'</p>';
+    return;
+  }
+  var html='';
+  logs.forEach(function(l){
+    var m=ACTION_CN[l.action]||[l.action,'info','•'];
+    var actorTxt=l.actor||'（未知来源）';
+    html+='<div class="log-item">'
+      +'<span class="log-ico '+m[1]+'">'+m[2]+'</span>'
+      +'<span class="log-meta">'
+      +'<span class="log-line1"><span class="log-tag '+m[1]+'">'+m[0]+'</span>'
+      +(l.detail?'<span class="log-what">'+esc(l.detail)+'</span>':'')
+      +'</span>'
+      +'<span class="log-actor"><span><b>操作人</b> '+esc(actorTxt)+'</span><span><b>IP</b> '+esc(l.ip||'-')+'</span></span>'
+      +'</span>'
+      +'<span class="log-time">'+fmtTs(l.ts)+'</span>'
+      +'</div>';
+  });
+  logList.innerHTML=html;
+}
+function openLog(){logPanel.classList.add('open');loadLogs(1);}
+function closeLog(){logPanel.classList.remove('open');}
+logBtn.addEventListener('click',function(){
+  if(logPanel.classList.contains('open'))closeLog();else openLog();
+});
+logCloseEl.addEventListener('click',closeLog);
+logFilter.addEventListener('change',function(){loadLogs(1);});
+logPrev.addEventListener('click',function(){if(LOG_PAGE>1)loadLogs(LOG_PAGE-1);});
+logNext.addEventListener('click',function(){if(LOG_PAGE<LOG_PAGES)loadLogs(LOG_PAGE+1);});
+
 /* ================= 键盘 ================= */
 function isTyping(t){
   return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
@@ -1140,6 +1289,7 @@ document.addEventListener('keydown',function(e){
     else if(!overlay.hidden){closeDialog();}
     else if(!acctOverlay.hidden){closeAcctOverlay();}
     else if(acctPanel.classList.contains('open')){closeAcct();}
+    else if(logPanel.classList.contains('open')){closeLog();}
     else if(!bmOverlay.hidden){closeBmOverlay();}
     else if(bmPanel.classList.contains('open')){closeBm();}
     else if(notePanel.classList.contains('open')){closeNote();}
