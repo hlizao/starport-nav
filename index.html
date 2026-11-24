@@ -30,6 +30,8 @@
     overflow-x:hidden;
   }
   #stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #jellyLayer{position:fixed;inset:0;z-index:0;pointer-events:none;display:none}
+  body.fx-on #jellyLayer{display:block}
   .aurora{
     position:fixed;inset:0;z-index:0;pointer-events:none;
     background:
@@ -366,6 +368,7 @@
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
 <div class="aurora" aria-hidden="true"></div>
+<canvas id="jellyLayer" aria-hidden="true"></canvas>
 
 <div class="page">
   <header class="topbar">
@@ -383,6 +386,7 @@
         <button type="button" class="tbtn auth-only" id="bmBtn">书签</button>
         <button type="button" class="tbtn admin-only" id="acctBtn">账号</button>
         <button type="button" class="tbtn auth-only" id="logBtn">日志</button>
+        <button type="button" class="tbtn" id="fxBtn" title="水母特效开关">特效</button>
         <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
         <button type="button" class="tbtn auth-only" id="editBtn">编辑</button>
         <button type="button" class="tbtn" id="loginBtn">登录</button>
@@ -1388,6 +1392,312 @@ renderChips();
 render();
 /* 先取 CSRF 令牌（GET status），再驱动页面加载；令牌异常也不阻断，由 api() 内部自动重试 */
 api('auth.php?action=status').then(function(){loadLinks();}).catch(function(){loadLinks();});
+})();
+</script>
+
+<!-- ================= 水母特效模块（独立 IIFE，可整体摘除，不影响其他功能） ================= -->
+<script>
+(function(){
+'use strict';
+var canvas=document.getElementById('jellyLayer');
+var fxBtn=document.getElementById('fxBtn');
+if(!canvas||!canvas.getContext||!fxBtn)return;
+var ctx=canvas.getContext('2d');
+var W=0,H=0,DPR=1;
+var running=false,desired=false,rafId=0,lastT=0,elapsed=0;
+var flock=[];
+var pointer={x:0,y:0,active:false};
+var touchTimer=0;
+var KEY='starport.fx';
+var mqReduce=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
+var HUES=[181,204,224,236,252]; // 青 -> 蓝 -> 蓝紫（与站点同色系）
+
+function isSmall(){return Math.min(window.innerWidth,window.innerHeight)<640;}
+function rand(a,b){return a+Math.random()*(b-a);}
+function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+function normAng(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
+
+/* ---------- 单只水母 ---------- */
+function Jelly(){
+  var small=isSmall();
+  this.size=rand(small?28:36,small?44:64);
+  this.x=rand(this.size*2,Math.max(this.size*3,W-this.size*2));
+  this.y=rand(this.size*2,Math.max(this.size*3,H-this.size*2));
+  this.heading=rand(0,Math.PI*2);
+  this.speed=0;
+  this.phase=rand(0,1);
+  this.bell=1;
+  this.hue=HUES[(Math.random()*HUES.length)|0];
+  this.alpha=rand(0.30,0.52);
+  this.wx=this.x;this.wy=this.y;
+  this.wanderT=rand(0,6);
+  this.ringA=rand(0,Math.PI*2);
+  this.tents=[];
+  var nT=small?4:5;
+  for(var i=0;i<nT;i++){
+    var pts=[];
+    for(var j=0;j<7;j++)pts.push({x:this.x,y:this.y});
+    this.tents.push({pts:pts,ph:rand(0,Math.PI*2)});
+  }
+}
+Jelly.prototype.update=function(dt,time){
+  var small=isSmall(),ring=small?70:90;
+  /* 收缩脉冲节律：phase 0->1 收缩（喷流），顶点施加冲量，随后舒张滑行 */
+  this.phase+=dt*(small?0.7:0.8);
+  var impulse=false;
+  if(this.phase>=1){this.phase-=1;impulse=true;}
+  var squeeze=Math.sin(this.phase*Math.PI);
+  this.bell=1-0.14*squeeze;
+
+  /* 期望朝向 */
+  var want;
+  if(pointer.active){
+    var dx=pointer.x-this.x,dy=pointer.y-this.y;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>ring){
+      want=Math.atan2(dy,dx);
+    }else{
+      /* 聚集完成：围绕鼠标缓慢公转，避免叠成一个点 */
+      this.ringA+=dt*0.9;
+      var rg=ring*(0.55+0.30*Math.sin(this.ringA*1.3));
+      want=Math.atan2(pointer.y+Math.sin(this.ringA)*rg*0.72-this.y,pointer.x+Math.cos(this.ringA)*rg-this.x);
+    }
+  }else{
+    this.wanderT-=dt;
+    if(this.wanderT<=0){
+      this.wanderT=rand(2.5,6);
+      this.wx=rand(this.size,W-this.size);
+      this.wy=rand(this.size,H-this.size);
+    }
+    want=Math.atan2(this.wy-this.y,this.wx-this.x);
+  }
+  /* 有限角速度转向（有惯性，不会瞬间掉头） */
+  var turn=(small?1.9:2.4)*dt;
+  var diff=normAng(want-this.heading);
+  this.heading=normAng(this.heading+clamp(diff,-turn,turn));
+
+  /* 冲量：仅收缩顶点施加，远则强近则弱 */
+  if(impulse){
+    var sp;
+    if(pointer.active){
+      var d2=Math.sqrt((pointer.x-this.x)*(pointer.x-this.x)+(pointer.y-this.y)*(pointer.y-this.y));
+      sp=d2>ring?clamp(40+d2*0.5,40,190):rand(10,26);
+    }else{
+      sp=rand(30,50);
+    }
+    this.speed+=sp*(0.55+0.45*Math.random());
+  }
+  /* 滑行衰减（脉冲式前进） */
+  this.speed*=Math.pow(0.06,dt);
+  this.x+=Math.cos(this.heading)*this.speed*dt;
+  this.y+=Math.sin(this.heading)*this.speed*dt;
+
+  /* 视口软边界：碰壁转向 */
+  var m=this.size*1.4;
+  if(this.x<m){this.x=m;this.heading=normAng(this.heading+0.7);}
+  else if(this.x>W-m){this.x=W-m;this.heading=normAng(this.heading-0.7);}
+  if(this.y<m){this.y=m;this.heading=normAng(this.heading+0.7);}
+  else if(this.y>H-m){this.y=H-m;this.heading=normAng(this.heading-0.7);}
+
+  /* 触手：锚点跟随伞体底缘，反航向拖曳 + 正弦摆动 */
+  var backA=this.heading+Math.PI;
+  var bx=this.x+Math.cos(backA)*(this.size*0.45*this.bell);
+  var by=this.y+Math.sin(backA)*(this.size*0.45*this.bell);
+  var seg=this.size*0.42;
+  for(var ti=0;ti<this.tents.length;ti++){
+    var tent=this.tents[ti],pts=tent.pts;
+    var spread=(ti-(this.tents.length-1)/2)*this.size*0.26;
+    pts[0].x=bx+Math.cos(this.heading+Math.PI/2)*spread;
+    pts[0].y=by+Math.sin(this.heading+Math.PI/2)*spread;
+    for(var k=1;k<pts.length;k++){
+      var pr=pts[k-1],p=pts[k];
+      var wob=Math.sin(time*2.0+tent.ph+k*0.85)*(1.5+k*0.7)*(this.speed>20?1.3:0.8);
+      var tx=pr.x+Math.cos(backA)*seg+Math.cos(this.heading)*wob*0.35;
+      var ty=pr.y+Math.sin(backA)*seg+Math.sin(this.heading)*wob*0.35;
+      var f=Math.min(1,12*dt);
+      p.x+=(tx-p.x)*f;p.y+=(ty-p.y)*f;
+      var ddx=p.x-pr.x,ddy=p.y-pr.y,dl=Math.sqrt(ddx*ddx+ddy*ddy)||1;
+      if(dl>seg){var ff=(dl-seg)/dl*0.85;p.x-=ddx*ff;p.y-=ddy*ff;}
+    }
+  }
+};
+Jelly.prototype.draw=function(){
+  var size=this.size,hue=this.hue;
+  /* 触手（先画，位于伞体之下） */
+  ctx.lineCap='round';
+  for(var ti=0;ti<this.tents.length;ti++){
+    var pts=this.tents[ti].pts;
+    for(var k=1;k<pts.length;k++){
+      var fade=1-k/pts.length;
+      ctx.beginPath();
+      ctx.moveTo(pts[k-1].x,pts[k-1].y);
+      ctx.lineTo(pts[k].x,pts[k].y);
+      ctx.strokeStyle='hsla('+hue+',80%,66%,'+(this.alpha*0.42*fade)+')';
+      ctx.lineWidth=Math.max(0.8,size*0.045*fade);
+      ctx.stroke();
+    }
+  }
+  /* 伞体 */
+  ctx.save();
+  ctx.translate(this.x,this.y);
+  ctx.rotate(this.heading-Math.PI/2);
+  var w=size*(0.92+0.08*this.bell);
+  var hh=size*0.60*this.bell;
+  /* 外发光 */
+  ctx.globalCompositeOperation='lighter';
+  var gg=ctx.createRadialGradient(0,-hh*0.5,0,0,-hh*0.5,w*1.05);
+  gg.addColorStop(0,'hsla('+hue+',90%,70%,'+(0.10*this.bell)+')');
+  gg.addColorStop(0.6,'hsla('+hue+',90%,60%,0.045)');
+  gg.addColorStop(1,'hsla('+hue+',90%,60%,0)');
+  ctx.fillStyle=gg;
+  ctx.beginPath();ctx.arc(0,-hh*0.5,w,0,Math.PI*2);ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+  /* 钟形伞体 */
+  ctx.beginPath();
+  ctx.moveTo(-w/2,0);
+  ctx.bezierCurveTo(-w/2,-hh*1.25,w/2,-hh*1.25,w/2,0);
+  ctx.quadraticCurveTo(0,-hh*0.30,-w/2,0);
+  ctx.closePath();
+  var g=ctx.createRadialGradient(0,-hh*0.55,w*0.08,0,-hh*0.55,w*0.9);
+  g.addColorStop(0,'hsla('+hue+',90%,82%,'+(this.alpha*0.9)+')');
+  g.addColorStop(0.55,'hsla('+hue+',85%,64%,'+(this.alpha*0.55)+')');
+  g.addColorStop(1,'hsla('+hue+',80%,55%,0)');
+  ctx.fillStyle=g;ctx.fill();
+  ctx.strokeStyle='hsla('+hue+',95%,86%,'+(this.alpha*0.75)+')';
+  ctx.lineWidth=Math.max(0.7,size*0.025);ctx.stroke();
+  /* 内部放射纹 */
+  ctx.strokeStyle='hsla('+hue+',85%,85%,'+(this.alpha*0.22)+')';
+  ctx.lineWidth=Math.max(0.5,size*0.012);
+  for(var r=-1;r<=1;r+=0.5){
+    ctx.beginPath();
+    ctx.moveTo(r*w*0.14,0);
+    ctx.quadraticCurveTo(r*w*0.22,-hh*0.7,r*w*0.30,-hh*0.95);
+    ctx.stroke();
+  }
+  ctx.restore();
+};
+
+/* ---------- 画布与主循环 ---------- */
+function fit(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth;H=window.innerHeight;
+  canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+function build(){
+  var n=isSmall()?5:9;
+  flock=[];
+  for(var i=0;i<n;i++)flock.push(new Jelly());
+}
+var fpsAcc=0,fpsN=0,lastDrawT=0,lastRawT=0;
+function frame(t){
+  if(!running)return;
+  rafId=requestAnimationFrame(frame);
+  /* 真实 rAF 频率统计（含星空层等全部开销），仅用于自适应判断 */
+  if(!lastRawT)lastRawT=t;
+  var rawDt=(t-lastRawT)/1000;lastRawT=t;
+  fpsAcc+=rawDt;fpsN++;
+  if(fpsAcc>=2){
+    var avg=fpsN/fpsAcc;
+    if(avg<30&&flock.length>4)flock.length=Math.max(4,flock.length-2);
+    fpsAcc=0;fpsN=0;
+  }
+  /* 水母层绘制上限约 30fps：慢速漂游视觉无差别，显著降低开销 */
+  if(t-lastDrawT<32)return;
+  var dt=(t-lastDrawT)/1000;lastDrawT=t;
+  if(!dt||dt<=0)return;
+  if(dt>0.1)dt=0.1;
+  elapsed+=dt;
+  ctx.clearRect(0,0,W,H);
+  for(var i=0;i<flock.length;i++)flock[i].update(dt,elapsed);
+  for(var j=0;j<flock.length;j++)flock[j].draw();
+}
+function resume(){
+  if(running)return;
+  fit();
+  if(!flock.length)build();
+  running=true;lastT=0;lastDrawT=0;lastRawT=0;fpsAcc=0;fpsN=0;
+  rafId=requestAnimationFrame(frame);
+  document.body.classList.add('fx-on');
+  fxBtn.classList.add('active');
+  fxBtn.title='水母特效：开（点击关闭）';
+}
+function pause(){
+  running=false;
+  if(rafId)cancelAnimationFrame(rafId);rafId=0;
+  ctx.clearRect(0,0,W,H);
+  document.body.classList.remove('fx-on');
+  fxBtn.classList.remove('active');
+  fxBtn.title='水母特效：关（点击开启）';
+}
+function setDesired(on){
+  desired=on;
+  if(on)resume();else pause();
+}
+
+/* ---------- 偏好与开关 ---------- */
+function prefOn(){
+  try{
+    var v=localStorage.getItem(KEY);
+    if(v==='0')return false;
+    if(v==='1')return true;
+  }catch(e){}
+  return !(mqReduce&&mqReduce.matches);
+}
+function setPref(on){try{localStorage.setItem(KEY,on?'1':'0');}catch(e){}}
+fxBtn.addEventListener('click',function(){
+  if(desired){setPref(false);setDesired(false);}
+  else{setPref(true);setDesired(true);}
+});
+if(mqReduce&&mqReduce.addEventListener){
+  mqReduce.addEventListener('change',function(e){
+    var v=null;try{v=localStorage.getItem(KEY);}catch(err){}
+    if(v===null)setDesired(!e.matches);
+  });
+}
+
+/* ---------- 输入（鼠标/触摸） ---------- */
+window.addEventListener('mousemove',function(e){
+  pointer.x=e.clientX;pointer.y=e.clientY;pointer.active=true;
+});
+document.documentElement.addEventListener('mouseleave',function(){pointer.active=false;});
+window.addEventListener('blur',function(){pointer.active=false;});
+window.addEventListener('touchstart',function(e){
+  var t=e.touches[0];if(!t)return;
+  pointer.x=t.clientX;pointer.y=t.clientY;pointer.active=true;
+  if(touchTimer)clearTimeout(touchTimer);
+},{passive:true});
+window.addEventListener('touchmove',function(e){
+  var t=e.touches[0];if(!t)return;
+  pointer.x=t.clientX;pointer.y=t.clientY;pointer.active=true;
+},{passive:true});
+window.addEventListener('touchend',function(){
+  if(touchTimer)clearTimeout(touchTimer);
+  touchTimer=setTimeout(function(){pointer.active=false;},3000);
+});
+
+/* ---------- 尺寸变化（防抖）与后台暂停 ---------- */
+var rzT=0;
+window.addEventListener('resize',function(){
+  if(rzT)clearTimeout(rzT);
+  rzT=setTimeout(function(){
+    var wasSmall=flock.length>0&&flock.length<=5;
+    if(desired&&flock.length&&wasSmall!==isSmall())build();
+    if(desired)fit();
+  },200);
+});
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    if(running){running=false;if(rafId)cancelAnimationFrame(rafId);rafId=0;}
+  }else if(desired){
+    resume();
+  }
+});
+
+/* ---------- 初始化 ---------- */
+if(prefOn()){setDesired(true);}
+else{fxBtn.title='水母特效：关（点击开启）';}
 })();
 </script>
 </body>
