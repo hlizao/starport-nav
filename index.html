@@ -786,11 +786,21 @@ updateNoteDot();
    UPDATE nav_admin SET pass_hash='<新哈希>' WHERE id=1;（可通过面板 phpMyAdmin 或一次性 PHP 脚本执行） */
 var API='api/';
 var logged=false;
-function api(path,opts){
+var csrfToken='';   // 会话绑定 CSRF 令牌（服务端 GET status / 登录 / 登出响应下发，写操作自动携带）
+function api(path,opts,retried){
   opts=opts||{};
-  opts.headers=Object.assign({'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},opts.headers||{});
+  var h={'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'};
+  if(csrfToken)h['X-CSRF-Token']=csrfToken;
+  opts.headers=Object.assign(h,opts.headers||{});
   if(opts.body&&typeof opts.body!=='string')opts.body=JSON.stringify(opts.body);
-  return fetch(API+path,opts).then(function(r){return r.json();});
+  return fetch(API+path,opts).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.csrf)csrfToken=d.csrf;         // 服务端下发/轮换令牌时同步保存
+    if(d&&d.error==='csrf'&&!retried){     // 令牌失效（会话空闲超时/登出轮换）：拉取新令牌后自动重试一次
+      delete opts.headers['X-CSRF-Token'];
+      return api('auth.php?action=status',{},true).then(function(){return api(path,opts,true);});
+    }
+    return d;
+  });
 }
 function applyAuth(){
   document.body.classList.toggle('logged',logged);
@@ -838,7 +848,7 @@ loginForm.addEventListener('submit',function(e){
       loadLinks();
     }else if(d&&d.error==='locked'){
       var m=Math.floor((d.locked_seconds||600)/60),s=(d.locked_seconds||600)%60;
-      loginErr.textContent='账号已锁定，请 '+m+' 分 '+s+' 秒后再试，或联系管理员解锁';
+      loginErr.textContent=(d.ip_locked?'当前网络 IP 因连续失败被临时限制':'账号已锁定')+'，请 '+m+' 分 '+s+' 秒后再试'+(d.ip_locked?'':'，或联系管理员解锁');
     }else if(d&&d.error==='bad-credentials'&&typeof d.remaining==='number'){
       loginErr.textContent='账号或密码不正确，剩余 '+d.remaining+' 次尝试机会';
       lWrapPass.classList.add('err');
@@ -996,18 +1006,19 @@ function removeBookmark(id){
 }
 
 /* ================= 账号管理（登录后可用） ================= */
-var accounts=[],acctEditId=null,acctDlgMode='create';
+var accounts=[],acctEditId=null,acctDlgMode='create',acctPwUser='';
 function fmtLock(sec){
   var m=Math.floor(sec/60),s=sec%60;
   return m>0?(m+' 分 '+(s>0?s+' 秒':'')):(s+' 秒');
 }
-function pwCheck(p){
+function pwCheck(p,username){
   var kinds=0;
   if(/[a-z]/.test(p))kinds++;
   if(/[A-Z]/.test(p))kinds++;
   if(/[0-9]/.test(p))kinds++;
   if(/[^a-zA-Z0-9]/.test(p))kinds++;
-  return {kinds:kinds,lenOk:p.length>=8,ok:p.length>=8&&kinds>=3};
+  var containsUser=username&&username.length>0&&p.toLowerCase().indexOf(String(username).toLowerCase())>=0;
+  return {kinds:kinds,lenOk:p.length>=8,containsUser:containsUser,ok:p.length>=8&&kinds>=3&&!containsUser};
 }
 function updatePwMeter(){
   var p=aPass.value,ck=pwCheck(p);
@@ -1074,8 +1085,9 @@ acctForm.addEventListener('submit',function(e){
   e.preventDefault();
   var p=aPass.value,p2=aPass2.value;
   if(p!==p2){acctErr.textContent='两次输入的密码不一致';aWrapPass2.classList.add('err');setTimeout(function(){aWrapPass2.classList.remove('err');},700);return;}
-  var ck=pwCheck(p);
-  if(!ck.ok){acctErr.textContent='密码不满足复杂度要求：至少 8 位，且包含大写字母、小写字母、数字、特殊字符中至少 3 类';aWrapPass.classList.add('err');setTimeout(function(){aWrapPass.classList.remove('err');},700);return;}
+  var tgt=(acctDlgMode==='create')?aUser.value.trim():acctPwUser;
+  var ck=pwCheck(p,tgt);
+  if(!ck.ok){acctErr.textContent='密码不满足复杂度要求：至少 8 位，且包含大写字母、小写字母、数字、特殊字符中至少 3 类'+(ck.containsUser?'，且不能包含用户名':'');aWrapPass.classList.add('err');setTimeout(function(){aWrapPass.classList.remove('err');},700);return;}
   if(acctDlgMode==='create'){
     var u=aUser.value.trim();
     if(!/^[A-Za-z0-9_-]{3,30}$/.test(u)){acctErr.textContent='用户名须为 3~30 位字母/数字/_/-';aWrapUser.classList.add('err');setTimeout(function(){aWrapUser.classList.remove('err');},700);return;}
@@ -1099,7 +1111,7 @@ acctList.addEventListener('click',function(e){
       if(d&&d.ok){loadAccounts();showToast('账号「'+user+'」已解锁');}
     }).catch(function(){});
   }else if(act==='pass'){
-    acctDlgMode='pass';acctEditId=id;
+    acctDlgMode='pass';acctEditId=id;acctPwUser=user;
     acctDlgTitle.textContent='修改密码 · '+user;
     aWrapUser.style.display='none';
     aWrapRole.style.display='none';
@@ -1194,7 +1206,8 @@ logged=false;
 applyAuth();
 renderChips();
 render();
-loadLinks();
+/* 先取 CSRF 令牌（GET status），再驱动页面加载；令牌异常也不阻断，由 api() 内部自动重试 */
+api('auth.php?action=status').then(function(){loadLinks();}).catch(function(){loadLinks();});
 })();
 </script>
 </body>

@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             json_out(['ok' => false, 'error' => 'bad-username',
                       'msg' => '用户名须为 3~30 位字母/数字/_/-'], 400);
         }
-        $policy = password_policy_errors($p);
+        $policy = password_policy_errors($p, $u);
         if ($policy) {
             json_out(['ok' => false, 'error' => 'weak-password', 'msg' => implode('；', $policy)], 400);
         }
@@ -49,19 +49,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         db()->prepare('INSERT INTO nav_admin (username, pass_hash, role) VALUES (?, ?, ?)')
             ->execute([$u, password_hash($p, PASSWORD_BCRYPT), $role]);
+        audit_log('create_user', $_SESSION['admin'], 'target=' . $u . ' role=' . $role);
         json_out(['ok' => true, 'created' => $u, 'role' => $role]);
     }
 
-    // 修改密码：复杂度强校验；改密成功顺带解锁
+    // 修改密码：复杂度强校验（含“禁含用户名”）；改密成功顺带解锁
     if ($action === 'change_pass') {
         $id = (int)($body['id'] ?? 0);
         $p  = (string)($body['pass'] ?? '');
-        $policy = password_policy_errors($p);
+        $st = db()->prepare('SELECT username FROM nav_admin WHERE id = ?');
+        $st->execute([$id]);
+        $target = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$target) {
+            json_out(['ok' => false, 'error' => 'not-found'], 404);
+        }
+        $policy = password_policy_errors($p, (string)$target['username']);
         if ($policy) {
             json_out(['ok' => false, 'error' => 'weak-password', 'msg' => implode('；', $policy)], 400);
         }
         $st = db()->prepare('UPDATE nav_admin SET pass_hash = ?, failed_count = 0, locked_until = 0 WHERE id = ?');
         $st->execute([password_hash($p, PASSWORD_BCRYPT), $id]);
+        audit_log('change_pass', $_SESSION['admin'], 'target=' . $target['username']);
         json_out(['ok' => true, 'changed' => $st->rowCount() > 0]);
     }
 
@@ -70,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($body['id'] ?? 0);
         $st = db()->prepare('UPDATE nav_admin SET failed_count = 0, locked_until = 0 WHERE id = ?');
         $st->execute([$id]);
+        audit_log('unlock', $_SESSION['admin'], 'target_id=' . $id);
         json_out(['ok' => true, 'unlocked' => $st->rowCount() > 0]);
     }
 
@@ -98,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM nav_note WHERE owner = ?')->execute([$target['username']]);
             $pdo->prepare('DELETE FROM nav_admin WHERE id = ?')->execute([$id]);
             $pdo->commit();
+            audit_log('delete_user', $_SESSION['admin'], 'target=' . $target['username']);
             json_out(['ok' => true, 'deleted' => $target['username']]);
         } catch (Throwable $e) {
             $pdo->rollBack();
