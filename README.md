@@ -8,6 +8,7 @@
 - **五个搜索引擎**：百度 / 必应 / 知乎 / B站 / 微博，一键切换；输入网址直接跳转；**搜索在新标签页打开**，导航页本身不被打断
 - **两组站点卡片**：办公协同（邮箱/文档/网盘/会议）+ 娱乐与生活（视频/音乐/购物/出行）
 - **管理员登录**：bcrypt 密码哈希存服务端，Session 会话（HttpOnly + SameSite），源码不含任何凭据
+- **账号管理与安全策略（登录后）**：多账号管理（唯一用户名唯一索引）；密码复杂度策略（≥8位 + 大写/小写/数字/特殊字符至少3类，前后端双重校验+实时指示器）；连续 5 次登录失败锁定 10 分钟（数据库级、跨会话/跨设备生效），管理员可提前解锁；删除保护（禁删自己/最后账号）
 - **书签管理器（登录后）**：仿 Chrome 书签管理器——文件夹分组、搜索过滤、添加/编辑/删除（带撤销），点击新标签页打开；数据存服务端，多设备同步
 - **登录后解锁**：编辑模式（增删改/撤销/恢复默认）+ 便签（自动保存）+ 书签
 - **访客只读**：未登录时所有写接口返回 401，防暴力破解（连错 5 次锁 60 秒）
@@ -31,6 +32,7 @@ MariaDB（nav_links / nav_note / nav_admin）
 | `api/links.php` | `GET` / `POST` | 公开读取全部链接；登录后整份替换保存 |
 | `api/note.php` | `GET` / `POST` | 登录后读写便签 |
 | `api/bookmarks.php` | `GET` / `POST` | 登录后读写书签（私人收藏，未登录 401） |
+| `api/admin.php` | `GET` / `POST` | 登录后账号管理：列表/创建/改密/解锁/删除 |
 
 ## 目录结构
 
@@ -42,7 +44,8 @@ MariaDB（nav_links / nav_note / nav_admin）
 │   ├── auth.php                # 登录/登出/会话状态
 │   ├── links.php               # 链接数据接口
 │   ├── note.php                # 便签接口
-│   └── bookmarks.php           # 书签接口
+│   ├── bookmarks.php           # 书签接口
+│   └── admin.php                # 账号管理接口（唯一性/复杂度/锁定解锁）
 ├── deploy/                     # 可选：本机 + Cloudflare 隧道部署脚本
 │   ├── start-nav.ps1
 │   ├── keepalive-nav.ps1
@@ -57,8 +60,8 @@ MariaDB（nav_links / nav_note / nav_admin）
 1. 上传 `index.html` 与 `api/`（含 PHP 文件）到站点根目录（如 `public_html/`）
 2. 复制 `api/config.sample.php` → `api/config.php`，填入数据库主机/库名/账号/密码
 3. 在数据库中创建表（SQL 见下方附录），并写入管理员账号：
-   - 生成密码哈希：`php -r "echo password_hash('你的密码', PASSWORD_BCRYPT);"`
-   - 写入：`INSERT INTO nav_admin (id, username, pass_hash) VALUES (1, 'admin', '<生成的哈希>');`
+   - 生成密码哈希（密码需满足：至少 8 位，且包含大写字母、小写字母、数字、特殊字符中至少 3 类）：`php -r "echo password_hash('你的密码', PASSWORD_BCRYPT);"`
+   - 写入：`INSERT INTO nav_admin (username, pass_hash) VALUES ('admin', '<生成的哈希>');`
 4. 访问域名 → 右上角「登录」→ 账号 `admin` + 你设置的密码
 5. 首次使用：登录 → 编辑 → 增删站点，内容自动保存到数据库，所有访客可见
 
@@ -83,17 +86,12 @@ CREATE TABLE IF NOT EXISTS nav_note (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS nav_admin (
-  id INT PRIMARY KEY,
-  username VARCHAR(50) NOT NULL,
-  pass_hash VARCHAR(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS nav_bookmarks (
-  id VARCHAR(20) PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  url VARCHAR(500) NOT NULL,
-  folder VARCHAR(60) NOT NULL DEFAULT '默认',
-  pos INT NOT NULL DEFAULT 0
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  pass_hash VARCHAR(100) NOT NULL,
+  failed_count INT NOT NULL DEFAULT 0,
+  locked_until INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
@@ -101,6 +99,9 @@ CREATE TABLE IF NOT EXISTS nav_bookmarks (
 
 - `api/config.php` 含数据库凭据，已在 `.gitignore` 中排除，**切勿提交**
 - 密码仅存 bcrypt 哈希；Session Cookie 设置 HttpOnly + SameSite=Lax（HTTPS 下 Secure）
+- **密码复杂度强校验**：≥8 位 + 大写/小写/数字/特殊字符至少 3 类（创建/改密时后端强制，前端实时指示）
+- **登录失败处理**：连续 5 次失败锁定 10 分钟（数据库级，跨会话/设备生效），登录成功清零计数；管理员可解锁；失败固定 300ms 延迟，不存在账号统一模糊提示（防枚举）
+- **用户名唯一**：数据库 UNIQUE 索引 + 创建时重复检查（409 冲突提示）
 - 所有写接口要求登录会话 + 自定义请求头（CSRF 防护）+ 输入校验
 - 登录失败限速：同一会话 60 秒内连续失败 5 次即锁定，每次失败固定 300ms 延迟
 - 直接双击 `index.html`（无后端）时仅显示默认数据、只读

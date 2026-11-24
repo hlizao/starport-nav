@@ -232,6 +232,27 @@
   .bk-act[data-act="del"]:hover{color:#F87171;background:rgba(248,113,113,.12)}
   .bk-empty{color:var(--ink-3);font-size:13px;text-align:center;padding:44px 0}
 
+  /* ---------- account manager & password meter ---------- */
+  .acct-item{
+    display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;
+    border:1px solid transparent;transition:background .15s,border-color .15s;
+  }
+  .acct-item:hover{background:var(--card-hover);border-color:var(--line)}
+  .acct-ava{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:600;color:#07222B;background:linear-gradient(135deg,var(--cyan),#818CF8)}
+  .acct-meta{min-width:0;flex:1;display:flex;flex-direction:column}
+  .acct-name{font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .acct-self{font-family:var(--mono);font-size:9.5px;color:var(--cyan);border:1px solid rgba(74,222,222,.4);border-radius:99px;padding:1px 7px;letter-spacing:.08em}
+  .acct-sub{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:3px}
+  .acct-status{font-size:11px;border-radius:99px;padding:2px 10px;font-family:var(--mono);flex:none;letter-spacing:.06em}
+  .acct-status.ok{color:#34D399;border:1px solid rgba(52,211,153,.4)}
+  .acct-status.locked{color:#F87171;border:1px solid rgba(248,113,113,.4)}
+  .acct-acts{display:flex;gap:4px;opacity:0;transition:opacity .15s;flex:none}
+  .acct-item:hover .acct-acts{opacity:1}
+  .pw-meter{display:flex;gap:5px;flex-wrap:wrap;margin:-6px 0 12px}
+  .pw-meter span{font-size:10.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:99px;padding:2px 9px;transition:color .15s,border-color .15s}
+  .pw-meter span.on{color:#34D399;border-color:rgba(52,211,153,.5)}
+  .pw-meter.fail span[data-k="len"]{color:#F87171;border-color:rgba(248,113,113,.4)}
+
   /* ---------- dialog ---------- */
   .overlay{
     position:fixed;inset:0;background:rgba(4,8,18,.62);backdrop-filter:blur(4px);
@@ -311,6 +332,7 @@
         <span class="user-chip" id="userChip">◈ admin</span>
         <button type="button" class="tbtn auth-only" id="noteBtn">便签<span id="noteDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span></button>
         <button type="button" class="tbtn auth-only" id="bmBtn">书签</button>
+        <button type="button" class="tbtn auth-only" id="acctBtn">账号</button>
         <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
         <button type="button" class="tbtn auth-only" id="editBtn">编辑</button>
         <button type="button" class="tbtn" id="loginBtn">登录</button>
@@ -402,6 +424,47 @@
     </div>
     <div class="dlg-actions">
       <button type="button" class="dlg-cancel" id="bmCancel">取消</button>
+      <button type="submit" class="dlg-save">保存</button>
+    </div>
+  </form>
+</div>
+
+<aside class="bk" id="acctPanel" aria-label="账号管理">
+  <div class="bk-head">
+    <span class="bk-title">账号管理</span>
+    <span class="bk-count" id="acctCount">0</span>
+    <span style="flex:1"></span>
+    <button type="button" class="bk-add" id="acctAddBtn">＋ 添加账号</button>
+    <button type="button" class="bk-close" id="acctClose" aria-label="关闭账号管理">✕</button>
+  </div>
+  <div class="bk-list" id="acctList"></div>
+</aside>
+
+<div class="overlay" id="acctOverlay" hidden>
+  <form class="dialog" id="acctForm" role="dialog" aria-modal="true" aria-labelledby="acctDlgTitle">
+    <h3 id="acctDlgTitle">添加账号</h3>
+    <div class="field" id="aWrapUser">
+      <label for="aUser">用户名（唯一标识）</label>
+      <input id="aUser" type="text" placeholder="3~30 位字母/数字/_/-" autocomplete="off">
+    </div>
+    <div class="field" id="aWrapPass">
+      <label for="aPass">密码</label>
+      <input id="aPass" type="password" placeholder="至少 8 位，含大小写/数字/特殊字符中至少 3 类" autocomplete="new-password">
+    </div>
+    <div class="pw-meter" id="pwMeter">
+      <span data-k="lower">小写字母</span>
+      <span data-k="upper">大写字母</span>
+      <span data-k="digit">数字</span>
+      <span data-k="special">特殊字符</span>
+      <span data-k="len">≥8 位</span>
+    </div>
+    <div class="field" id="aWrapPass2">
+      <label for="aPass2">确认密码</label>
+      <input id="aPass2" type="password" autocomplete="new-password">
+    </div>
+    <p class="login-err" id="acctErr" role="alert"></p>
+    <div class="dlg-actions">
+      <button type="button" class="dlg-cancel" id="acctCancel">取消</button>
       <button type="submit" class="dlg-save">保存</button>
     </div>
   </form>
@@ -503,7 +566,13 @@ var groupsEl=$('groups'),enginesEl=$('engines'),input=$('searchInput'),
     bmSearch=$('bmSearch'),bmAddBtn=$('bmAddBtn'),bmCloseEl=$('bmClose'),
     bmOverlay=$('bmOverlay'),bmForm=$('bmForm'),bmDlgTitle=$('bmDlgTitle'),
     bmName=$('bmName'),bmUrl=$('bmUrl'),bmFolder=$('bmFolder'),bmFolderList=$('bmFolderList'),
-    bmWrapName=$('bmWrapName'),bmWrapUrl=$('bmWrapUrl');
+    bmWrapName=$('bmWrapName'),bmWrapUrl=$('bmWrapUrl'),
+    acctBtn=$('acctBtn'),acctPanel=$('acctPanel'),acctList=$('acctList'),acctCount=$('acctCount'),
+    acctAddBtn=$('acctAddBtn'),acctCloseEl=$('acctClose'),
+    acctOverlay=$('acctOverlay'),acctForm=$('acctForm'),acctDlgTitle=$('acctDlgTitle'),
+    aUser=$('aUser'),aPass=$('aPass'),aPass2=$('aPass2'),
+    aWrapUser=$('aWrapUser'),aWrapPass=$('aWrapPass'),aWrapPass2=$('aWrapPass2'),
+    pwMeter=$('pwMeter'),acctErr=$('acctErr');
 
 function persist(){
   api('links.php',{method:'POST',body:{links:links}}).then(function(d){
@@ -719,6 +788,8 @@ function applyAuth(){
     notePanel.classList.remove('open');
     bmPanel.classList.remove('open');
     bmOverlay.hidden=true;
+    acctPanel.classList.remove('open');
+    acctOverlay.hidden=true;
   }
   updateNoteDot();
 }
@@ -738,12 +809,19 @@ loginForm.addEventListener('submit',function(e){
   api('auth.php',{method:'POST',body:{action:'login',user:u,pass:p}}).then(function(d){
     if(d&&d.ok){
       logged=true;
+      window.__selfUser=d.user;
+      userChip.textContent='◈ '+d.user;
       applyAuth();closeLogin();
       lPass.value='';lUser.value='';
       showToast('登录成功，编辑与便签已解锁');
       loadNote();
     }else if(d&&d.error==='locked'){
-      loginErr.textContent='尝试过于频繁，请 60 秒后再试';
+      var m=Math.floor((d.locked_seconds||600)/60),s=(d.locked_seconds||600)%60;
+      loginErr.textContent='账号已锁定，请 '+m+' 分 '+s+' 秒后再试，或联系管理员解锁';
+    }else if(d&&d.error==='bad-credentials'&&typeof d.remaining==='number'){
+      loginErr.textContent='账号或密码不正确，剩余 '+d.remaining+' 次尝试机会';
+      lWrapPass.classList.add('err');
+      setTimeout(function(){lWrapPass.classList.remove('err');},700);
     }else{
       loginErr.textContent='账号或密码不正确';
       lWrapPass.classList.add('err');
@@ -893,6 +971,122 @@ function removeBookmark(id){
   });
 }
 
+/* ================= 账号管理（登录后可用） ================= */
+var accounts=[],acctEditId=null,acctDlgMode='create';
+function fmtLock(sec){
+  var m=Math.floor(sec/60),s=sec%60;
+  return m>0?(m+' 分 '+(s>0?s+' 秒':'')):(s+' 秒');
+}
+function pwCheck(p){
+  var kinds=0;
+  if(/[a-z]/.test(p))kinds++;
+  if(/[A-Z]/.test(p))kinds++;
+  if(/[0-9]/.test(p))kinds++;
+  if(/[^a-zA-Z0-9]/.test(p))kinds++;
+  return {kinds:kinds,lenOk:p.length>=8,ok:p.length>=8&&kinds>=3};
+}
+function updatePwMeter(){
+  var p=aPass.value,ck=pwCheck(p);
+  pwMeter.querySelectorAll('span').forEach(function(sp){
+    var k=sp.dataset.k,on=false;
+    if(k==='lower')on=/[a-z]/.test(p);
+    else if(k==='upper')on=/[A-Z]/.test(p);
+    else if(k==='digit')on=/[0-9]/.test(p);
+    else if(k==='special')on=/[^a-zA-Z0-9]/.test(p);
+    else if(k==='len')on=ck.lenOk;
+    sp.classList.toggle('on',on);
+  });
+  pwMeter.classList.toggle('fail',p.length>0&&!ck.lenOk);
+}
+aPass.addEventListener('input',updatePwMeter);
+function loadAccounts(){
+  api('admin.php').then(function(d){
+    if(d&&d.ok){accounts=d.accounts||[];window.__selfUser=d.self||window.__selfUser;renderAccounts();}
+  }).catch(function(){});
+}
+function renderAccounts(){
+  acctCount.textContent=accounts.length;
+  var html='';
+  accounts.forEach(function(a){
+    var self=a.username===window.__selfUser;
+    var lockTxt=a.locked?('锁定 · 剩 '+fmtLock(a.locked_seconds)):'正常';
+    var statusCls=a.locked?'locked':'ok';
+    var sub='失败 '+(a.failed_count||0)+'/5 · 创建于 '+String(a.created_at||'').slice(0,10);
+    html+='<div class="acct-item" data-id="'+a.id+'" data-user="'+esc(a.username)+'">'
+      +'<span class="acct-ava">'+esc(String(a.username).charAt(0).toUpperCase())+'</span>'
+      +'<span class="acct-meta"><span class="acct-name">'+esc(a.username)+(self?'<span class="acct-self">当前登录</span>':'')+'</span>'
+      +'<span class="acct-sub">'+sub+'</span></span>'
+      +'<span class="acct-status '+statusCls+'">'+lockTxt+'</span>'
+      +'<span class="acct-acts">'
+      +(a.locked?'<button type="button" class="bk-act" data-act="unlock" data-id="'+a.id+'">解锁</button>':'')
+      +'<button type="button" class="bk-act" data-act="pass" data-id="'+a.id+'" data-user="'+esc(a.username)+'">改密</button>'
+      +(self?'':'<button type="button" class="bk-act" data-act="del" data-id="'+a.id+'" data-user="'+esc(a.username)+'">删除</button>')
+      +'</span></div>';
+  });
+  acctList.innerHTML=html||'<p class="bk-empty">没有账号数据</p>';
+}
+function openAcct(){acctPanel.classList.add('open');loadAccounts();}
+function closeAcct(){acctPanel.classList.remove('open');}
+function closeAcctOverlay(){acctOverlay.hidden=true;acctEditId=null;acctErr.textContent='';aPass.value='';aPass2.value='';aUser.value='';}
+acctBtn.addEventListener('click',function(){
+  if(acctPanel.classList.contains('open'))closeAcct();else openAcct();
+});
+acctCloseEl.addEventListener('click',closeAcct);
+acctAddBtn.addEventListener('click',function(){
+  acctDlgMode='create';acctEditId=null;
+  acctDlgTitle.textContent='添加账号';
+  aWrapUser.style.display='';
+  acctErr.textContent='';aUser.value='';aPass.value='';aPass2.value='';
+  updatePwMeter();
+  acctOverlay.hidden=false;setTimeout(function(){aUser.focus();},30);
+});
+$('acctCancel').addEventListener('click',closeAcctOverlay);
+acctOverlay.addEventListener('click',function(e){if(e.target===acctOverlay)closeAcctOverlay();});
+acctForm.addEventListener('submit',function(e){
+  e.preventDefault();
+  var p=aPass.value,p2=aPass2.value;
+  if(p!==p2){acctErr.textContent='两次输入的密码不一致';aWrapPass2.classList.add('err');setTimeout(function(){aWrapPass2.classList.remove('err');},700);return;}
+  var ck=pwCheck(p);
+  if(!ck.ok){acctErr.textContent='密码不满足复杂度要求：至少 8 位，且包含大写字母、小写字母、数字、特殊字符中至少 3 类';aWrapPass.classList.add('err');setTimeout(function(){aWrapPass.classList.remove('err');},700);return;}
+  if(acctDlgMode==='create'){
+    var u=aUser.value.trim();
+    if(!/^[A-Za-z0-9_-]{3,30}$/.test(u)){acctErr.textContent='用户名须为 3~30 位字母/数字/_/-';aWrapUser.classList.add('err');setTimeout(function(){aWrapUser.classList.remove('err');},700);return;}
+    api('admin.php',{method:'POST',body:{action:'create',username:u,pass:p}}).then(function(d){
+      if(d&&d.ok){closeAcctOverlay();loadAccounts();showToast('账号「'+u+'」已创建');}
+      else{acctErr.textContent=(d&&d.msg)||'创建失败';}
+    }).catch(function(){acctErr.textContent='网络异常，请重试';});
+  }else{
+    api('admin.php',{method:'POST',body:{action:'change_pass',id:acctEditId,pass:p}}).then(function(d){
+      if(d&&d.ok){closeAcctOverlay();loadAccounts();showToast('密码已修改（失败计数已重置）');}
+      else{acctErr.textContent=(d&&d.msg)||'修改失败';}
+    }).catch(function(){acctErr.textContent='网络异常，请重试';});
+  }
+});
+acctList.addEventListener('click',function(e){
+  var btn=e.target.closest('.bk-act');
+  if(!btn)return;
+  var id=btn.dataset.id,user=btn.dataset.user,act=btn.dataset.act;
+  if(act==='unlock'){
+    api('admin.php',{method:'POST',body:{action:'unlock',id:id}}).then(function(d){
+      if(d&&d.ok){loadAccounts();showToast('账号「'+user+'」已解锁');}
+    }).catch(function(){});
+  }else if(act==='pass'){
+    acctDlgMode='pass';acctEditId=id;
+    acctDlgTitle.textContent='修改密码 · '+user;
+    aWrapUser.style.display='none';
+    acctErr.textContent='';aPass.value='';aPass2.value='';
+    updatePwMeter();
+    acctOverlay.hidden=false;setTimeout(function(){aPass.focus();},30);
+  }else if(act==='del'){
+    if(confirm('删除账号「'+user+'」？\n删除后该账号将无法登录。')){
+      api('admin.php',{method:'POST',body:{action:'delete',id:id}}).then(function(d){
+        if(d&&d.ok){loadAccounts();showToast('账号「'+user+'」已删除');}
+        else{showToast((d&&d.msg)||'删除失败');}
+      }).catch(function(){});
+    }
+  }
+});
+
 /* ================= 键盘 ================= */
 function isTyping(t){
   return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
@@ -903,6 +1097,8 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
     if(!loginOverlay.hidden){closeLogin();}
     else if(!overlay.hidden){closeDialog();}
+    else if(!acctOverlay.hidden){closeAcctOverlay();}
+    else if(acctPanel.classList.contains('open')){closeAcct();}
     else if(!bmOverlay.hidden){closeBmOverlay();}
     else if(bmPanel.classList.contains('open')){closeBm();}
     else if(notePanel.classList.contains('open')){closeNote();}
@@ -955,7 +1151,7 @@ function loadServerState(){
     if(d&&d.ok&&Array.isArray(d.links)&&d.links.length){links=d.links;render();}
   }).catch(function(){});
   api('auth.php?action=status').then(function(d){
-    if(d&&d.ok&&d.logged){logged=true;applyAuth();loadNote();}
+    if(d&&d.ok&&d.logged){logged=true;window.__selfUser=d.user;userChip.textContent='◈ '+d.user;applyAuth();loadNote();}
   }).catch(function(){});
 }
 logged=false;
