@@ -253,6 +253,14 @@
   .pw-meter span.on{color:#34D399;border-color:rgba(52,211,153,.5)}
   .pw-meter.fail span[data-k="len"]{color:#F87171;border-color:rgba(248,113,113,.4)}
 
+  /* ---------- role gating & page chip ---------- */
+  .admin-only{display:none}
+  body.role-admin .admin-only{display:inline-block}
+  .page-chip{display:none;align-items:center;color:var(--ink-2);font-size:11px;padding:2px 10px;font-family:var(--mono);letter-spacing:.12em;border:1px solid var(--line);border-radius:99px}
+  body.logged .page-chip{display:flex}
+  .acct-role{font-family:var(--mono);font-size:9.5px;color:var(--violet);border:1px solid rgba(167,139,250,.4);border-radius:99px;padding:1px 7px;letter-spacing:.08em}
+  .acct-role.user{color:var(--ink-3);border-color:var(--line)}
+
   /* ---------- dialog ---------- */
   .overlay{
     position:fixed;inset:0;background:rgba(4,8,18,.62);backdrop-filter:blur(4px);
@@ -330,9 +338,10 @@
     </div>
       <div class="toolbar">
         <span class="user-chip" id="userChip">◈ admin</span>
+        <span class="page-chip" id="pageChip">原始首页</span>
         <button type="button" class="tbtn auth-only" id="noteBtn">便签<span id="noteDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span></button>
         <button type="button" class="tbtn auth-only" id="bmBtn">书签</button>
-        <button type="button" class="tbtn auth-only" id="acctBtn">账号</button>
+        <button type="button" class="tbtn admin-only" id="acctBtn">账号</button>
         <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
         <button type="button" class="tbtn auth-only" id="editBtn">编辑</button>
         <button type="button" class="tbtn" id="loginBtn">登录</button>
@@ -447,6 +456,13 @@
       <label for="aUser">用户名（唯一标识）</label>
       <input id="aUser" type="text" placeholder="3~30 位字母/数字/_/-" autocomplete="off">
     </div>
+    <div class="field" id="aWrapRole">
+      <label for="aRole">角色</label>
+      <select id="aRole">
+        <option value="user">普通用户（仅编辑自己的导航页）</option>
+        <option value="admin">管理员（可编辑原始首页 + 账号管理）</option>
+      </select>
+    </div>
     <div class="field" id="aWrapPass">
       <label for="aPass">密码</label>
       <input id="aPass" type="password" placeholder="至少 8 位，含大小写/数字/特殊字符中至少 3 类" autocomplete="new-password">
@@ -472,7 +488,7 @@
 
 <div class="overlay" id="loginOverlay" hidden>
   <form class="dialog" id="loginForm" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-    <h3 id="loginTitle">管理员登录</h3>
+    <h3 id="loginTitle">账号登录</h3>
     <div class="field" id="lWrapUser">
       <label for="lUser">账号</label>
       <input id="lUser" type="text" placeholder="账号" autocomplete="username">
@@ -570,9 +586,9 @@ var groupsEl=$('groups'),enginesEl=$('engines'),input=$('searchInput'),
     acctBtn=$('acctBtn'),acctPanel=$('acctPanel'),acctList=$('acctList'),acctCount=$('acctCount'),
     acctAddBtn=$('acctAddBtn'),acctCloseEl=$('acctClose'),
     acctOverlay=$('acctOverlay'),acctForm=$('acctForm'),acctDlgTitle=$('acctDlgTitle'),
-    aUser=$('aUser'),aPass=$('aPass'),aPass2=$('aPass2'),
-    aWrapUser=$('aWrapUser'),aWrapPass=$('aWrapPass'),aWrapPass2=$('aWrapPass2'),
-    pwMeter=$('pwMeter'),acctErr=$('acctErr');
+    aUser=$('aUser'),aPass=$('aPass'),aPass2=$('aPass2'),aRole=$('aRole'),
+    aWrapUser=$('aWrapUser'),aWrapPass=$('aWrapPass'),aWrapPass2=$('aWrapPass2'),aWrapRole=$('aWrapRole'),
+    pwMeter=$('pwMeter'),acctErr=$('acctErr'),pageChip=$('pageChip');
 
 function persist(){
   api('links.php',{method:'POST',body:{links:links}}).then(function(d){
@@ -778,6 +794,11 @@ function api(path,opts){
 }
 function applyAuth(){
   document.body.classList.toggle('logged',logged);
+  document.body.classList.toggle('role-admin',logged&&window.__role==='admin');
+  document.body.classList.toggle('role-user',logged&&window.__role==='user');
+  if(logged){
+    userChip.textContent='◈ '+(window.__selfUser||'')+(window.__role==='admin'?' · 管理员':' · 用户');
+  }
   if(!logged){
     if(editing){
       editing=false;
@@ -810,11 +831,11 @@ loginForm.addEventListener('submit',function(e){
     if(d&&d.ok){
       logged=true;
       window.__selfUser=d.user;
-      userChip.textContent='◈ '+d.user;
+      window.__role=d.role||'user';
       applyAuth();closeLogin();
       lPass.value='';lUser.value='';
       showToast('登录成功，编辑与便签已解锁');
-      loadNote();
+      loadLinks();
     }else if(d&&d.error==='locked'){
       var m=Math.floor((d.locked_seconds||600)/60),s=(d.locked_seconds||600)%60;
       loginErr.textContent='账号已锁定，请 '+m+' 分 '+s+' 秒后再试，或联系管理员解锁';
@@ -831,8 +852,11 @@ loginForm.addEventListener('submit',function(e){
 });
 logoutBtn.addEventListener('click',function(){
   api('auth.php',{method:'POST',body:{action:'logout'}}).catch(function(){});
-  logged=false;applyAuth();
-  showToast('已退出登录');
+  logged=false;window.__selfUser=null;window.__role=null;
+  noteText.value='';
+  applyAuth();
+  showToast('已退出登录，回到原始导航首页');
+  loadLinks();
 });
 
 /* ================= 书签管理器（登录后可用） ================= */
@@ -1009,12 +1033,14 @@ function renderAccounts(){
   var html='';
   accounts.forEach(function(a){
     var self=a.username===window.__selfUser;
+    var isAdmin=(a.role||'user')==='admin';
+    var roleBadge=isAdmin?'<span class="acct-role">管理员</span>':'<span class="acct-role user">用户</span>';
     var lockTxt=a.locked?('锁定 · 剩 '+fmtLock(a.locked_seconds)):'正常';
     var statusCls=a.locked?'locked':'ok';
     var sub='失败 '+(a.failed_count||0)+'/5 · 创建于 '+String(a.created_at||'').slice(0,10);
     html+='<div class="acct-item" data-id="'+a.id+'" data-user="'+esc(a.username)+'">'
       +'<span class="acct-ava">'+esc(String(a.username).charAt(0).toUpperCase())+'</span>'
-      +'<span class="acct-meta"><span class="acct-name">'+esc(a.username)+(self?'<span class="acct-self">当前登录</span>':'')+'</span>'
+      +'<span class="acct-meta"><span class="acct-name">'+esc(a.username)+roleBadge+(self?'<span class="acct-self">当前登录</span>':'')+'</span>'
       +'<span class="acct-sub">'+sub+'</span></span>'
       +'<span class="acct-status '+statusCls+'">'+lockTxt+'</span>'
       +'<span class="acct-acts">'
@@ -1036,6 +1062,8 @@ acctAddBtn.addEventListener('click',function(){
   acctDlgMode='create';acctEditId=null;
   acctDlgTitle.textContent='添加账号';
   aWrapUser.style.display='';
+  aWrapRole.style.display='';
+  aRole.value='user';
   acctErr.textContent='';aUser.value='';aPass.value='';aPass2.value='';
   updatePwMeter();
   acctOverlay.hidden=false;setTimeout(function(){aUser.focus();},30);
@@ -1051,8 +1079,8 @@ acctForm.addEventListener('submit',function(e){
   if(acctDlgMode==='create'){
     var u=aUser.value.trim();
     if(!/^[A-Za-z0-9_-]{3,30}$/.test(u)){acctErr.textContent='用户名须为 3~30 位字母/数字/_/-';aWrapUser.classList.add('err');setTimeout(function(){aWrapUser.classList.remove('err');},700);return;}
-    api('admin.php',{method:'POST',body:{action:'create',username:u,pass:p}}).then(function(d){
-      if(d&&d.ok){closeAcctOverlay();loadAccounts();showToast('账号「'+u+'」已创建');}
+    api('admin.php',{method:'POST',body:{action:'create',username:u,pass:p,role:aRole.value}}).then(function(d){
+      if(d&&d.ok){closeAcctOverlay();loadAccounts();showToast('账号「'+u+'」已创建（'+(aRole.value==='admin'?'管理员':'普通用户')+'）');}
       else{acctErr.textContent=(d&&d.msg)||'创建失败';}
     }).catch(function(){acctErr.textContent='网络异常，请重试';});
   }else{
@@ -1074,6 +1102,7 @@ acctList.addEventListener('click',function(e){
     acctDlgMode='pass';acctEditId=id;
     acctDlgTitle.textContent='修改密码 · '+user;
     aWrapUser.style.display='none';
+    aWrapRole.style.display='none';
     acctErr.textContent='';aPass.value='';aPass2.value='';
     updatePwMeter();
     acctOverlay.hidden=false;setTimeout(function(){aPass.focus();},30);
@@ -1146,19 +1175,26 @@ window.addEventListener('mousemove',function(e){mx=e.clientX/W-.5;my=e.clientY/H
 if(REDUCED){paint();}else{loop();}
 
 /* ================= 启动 ================= */
-function loadServerState(){
+/* loadLinks：唯一驱动器——服务端按会话返回对应页面（访客/管理员→原始首页；普通用户→个人页）
+   并携带登录角色，据此驱动整套角色门禁 UI */
+function loadLinks(){
   api('links.php').then(function(d){
-    if(d&&d.ok&&Array.isArray(d.links)&&d.links.length){links=d.links;render();}
-  }).catch(function(){});
-  api('auth.php?action=status').then(function(d){
-    if(d&&d.ok&&d.logged){logged=true;window.__selfUser=d.user;userChip.textContent='◈ '+d.user;applyAuth();loadNote();}
+    if(d&&d.ok){
+      links=Array.isArray(d.links)?d.links:[];
+    if(d.role){logged=true;window.__selfUser=d.user;window.__role=d.role;}
+    else{logged=false;window.__selfUser=null;window.__role=null;}
+    applyAuth();
+    pageChip.textContent=(d.page==='personal')?'我的导航页':'原始首页';
+    render();
+    if(logged)loadNote();
+  }
   }).catch(function(){});
 }
 logged=false;
 applyAuth();
 renderChips();
 render();
-loadServerState();
+loadLinks();
 })();
 </script>
 </body>

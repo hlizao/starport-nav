@@ -1,11 +1,31 @@
 <?php
-// 星港导航 · 链接数据接口
-// GET  —— 公开读取全部链接
-// POST —— 需登录：整份替换保存（JSON: {"links":[{name,url,group,c1,c2}...]}）
+// 星港导航 · 链接数据接口（角色权限版）
+// GET  —— 访客/管理员：原始首页；普通用户：自己的导航页（首次自动复制原始首页）
+// POST —— 管理员：保存原始首页；普通用户：保存自己的导航页（服务端强制，无法越权）
 require __DIR__ . '/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $rows = db()->query('SELECT id, name, url, domain, grp, c1, c2 FROM nav_links ORDER BY pos, id')->fetchAll(PDO::FETCH_ASSOC);
+    $u     = current_user();
+    $owner = page_owner_for($u);
+    $pdo   = db();
+
+    // 普通用户首次访问：自动从原始首页复制一份个人页
+    if ($owner !== '') {
+        $st = $pdo->prepare('SELECT COUNT(*) FROM nav_links WHERE owner = ?');
+        $st->execute([$owner]);
+        if ((int)$st->fetchColumn() === 0) {
+            if (!preg_match('/^[A-Za-z0-9_-]{3,30}$/', $owner)) {
+                json_out(['ok' => false, 'error' => 'bad-owner'], 400);
+            }
+            $pdo->prepare("INSERT INTO nav_links (owner, id, name, url, domain, grp, c1, c2, pos)
+                           SELECT ?, id, name, url, domain, grp, c1, c2, pos FROM nav_links WHERE owner = ''")
+                ->execute([$owner]);
+        }
+    }
+
+    $st = $pdo->prepare('SELECT id, name, url, domain, grp, c1, c2 FROM nav_links WHERE owner = ? ORDER BY pos, id');
+    $st->execute([$owner]);
+    $rows = $st->fetchAll(PDO::FETCH_ASSOC);
     $links = array_map(function ($r) {
         return [
             'id'     => $r['id'],
@@ -17,12 +37,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'c2'     => $r['c2'],
         ];
     }, $rows);
-    json_out(['ok' => true, 'links' => $links]);
+    json_out([
+        'ok'    => true,
+        'links' => $links,
+        'user'  => $u['username'] ?? null,
+        'role'  => $u['role'] ?? null,
+        'page'  => $owner === '' ? 'original' : 'personal',
+    ]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_auth();
+    $u     = require_auth();   // 未登录 401
     check_csrf();
+    $owner = page_owner_for($u); // 服务端决定可写归属：管理员→原始首页；普通用户→本人页面
     $body  = read_json_body();
     $links = $body['links'] ?? null;
     if (!is_array($links) || count($links) > 200) {
@@ -32,8 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = db();
     $pdo->beginTransaction();
     try {
-        $pdo->exec('DELETE FROM nav_links');
-        $st  = $pdo->prepare('INSERT INTO nav_links (id, name, url, domain, grp, c1, c2, pos) VALUES (?,?,?,?,?,?,?,?)');
+        // 只清空本人/本页归属的数据，绝不动其他用户的页面或原始首页
+        $pdo->prepare('DELETE FROM nav_links WHERE owner = ?')->execute([$owner]);
+        $st  = $pdo->prepare('INSERT INTO nav_links (id, name, url, domain, grp, c1, c2, pos, owner) VALUES (?,?,?,?,?,?,?,?,?)');
         $pos = 0;
         foreach ($links as $l) {
             if (!is_array($l)) continue;
@@ -52,10 +80,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = preg_match('/^[A-Za-z0-9_-]{1,20}$/', $idRaw)
                 ? $idRaw
                 : 'l' . substr(md5(uniqid('', true)), 0, 10);
-            $st->execute([$id, $name, $url, $domain, $grp, $c1, $c2, $pos++]);
+            $st->execute([$id, $name, $url, $domain, $grp, $c1, $c2, $pos++, $owner]);
         }
         $pdo->commit();
-        json_out(['ok' => true, 'saved' => $pos]);
+        json_out(['ok' => true, 'saved' => $pos, 'page' => $owner === '' ? 'original' : 'personal']);
     } catch (Throwable $e) {
         $pdo->rollBack();
         json_out(['ok' => false, 'error' => 'db-error'], 500);

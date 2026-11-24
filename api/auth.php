@@ -3,12 +3,13 @@
 require __DIR__ . '/config.php';
 
 // GET ?action=status —— 查询当前登录状态
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'status') {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'status') {
     start_session();
     json_out([
         'ok'     => true,
         'logged' => !empty($_SESSION['admin']),
         'user'   => $_SESSION['admin'] ?? null,
+        'role'   => $_SESSION['role'] ?? null,
     ]);
 }
 
@@ -29,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         start_session();
 
         // 账号唯一：按用户名精确匹配（数据库 UNIQUE 索引保证唯一性）
-        $st = db()->prepare('SELECT id, username, pass_hash, failed_count, locked_until FROM nav_admin WHERE username = ?');
+        $st = db()->prepare('SELECT id, username, pass_hash, failed_count, locked_until, role FROM nav_admin WHERE username = ?');
         $st->execute([$u === '' ? "\0absent" : $u]);
         $row = $st->fetch(PDO::FETCH_ASSOC);
 
@@ -50,13 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($u !== '' && $p !== '' && password_verify($p, $row['pass_hash'])) {
-            // 登录成功：清零失败计数
+            // 登录成功：清零失败计数，写入角色
             db()->prepare('UPDATE nav_admin SET failed_count = 0, locked_until = 0 WHERE id = ?')
                 ->execute([$row['id']]);
             $_SESSION['fails'] = 0;
             session_regenerate_id(true); // 防会话固定攻击
             $_SESSION['admin'] = $row['username'];
-            json_out(['ok' => true, 'user' => $row['username']]);
+            $_SESSION['role']  = $row['role'] ?: 'user';
+            json_out(['ok' => true, 'user' => $row['username'], 'role' => $_SESSION['role']]);
         }
 
         // 登录失败：数据库级计数；连续 LOCK_THRESHOLD 次锁定 LOCK_SECONDS 秒
