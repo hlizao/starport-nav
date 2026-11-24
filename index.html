@@ -191,6 +191,47 @@
   }
   .note textarea::placeholder{color:var(--ink-3)}
 
+  /* ---------- bookmark manager ---------- */
+  .bk{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(720px,calc(100vw - 28px));height:min(560px,calc(100vh - 56px));
+    background:rgba(13,20,38,.97);border:1px solid var(--line-strong);border-radius:18px;
+    padding:16px 18px;z-index:50;backdrop-filter:blur(10px);
+    box-shadow:0 24px 70px rgba(0,0,0,.5);display:none;flex-direction:column;
+  }
+  .bk.open{display:flex;animation:rise .22s ease both}
+  .bk-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .bk-title{font-size:14.5px;font-weight:600;letter-spacing:.04em}
+  .bk-count{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:99px;padding:1px 9px}
+  .bk-search{
+    flex:1;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--line);
+    border-radius:10px;color:var(--ink);font-size:13px;height:34px;padding:0 12px;outline:none;font-family:var(--sans);
+  }
+  .bk-search:focus{border-color:rgba(74,222,222,.5)}
+  .bk-add{
+    background:linear-gradient(135deg,var(--cyan),#818CF8);border:none;color:#07222B;
+    font-weight:700;font-size:12.5px;height:34px;padding:0 16px;border-radius:10px;cursor:pointer;font-family:var(--sans);flex:none;
+  }
+  .bk-close{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;flex:none}
+  .bk-close:hover{color:var(--ink)}
+  .bk-list{flex:1;overflow-y:auto;padding-right:4px}
+  .bk-folder{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--ink-3);margin:14px 4px 8px}
+  .bk-item{
+    display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:12px;cursor:pointer;
+    border:1px solid transparent;transition:background .15s,border-color .15s;
+  }
+  .bk-item:hover,.bk-item:focus-visible{background:var(--card-hover);border-color:var(--line)}
+  .bk-ava{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .bk-meta{min-width:0;flex:1;display:flex;flex-direction:column}
+  .bk-name{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bk-dom{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bk-acts{display:flex;gap:4px;opacity:0;transition:opacity .15s;flex:none}
+  .bk-item:hover .bk-acts,.bk-item:focus-within .bk-acts{opacity:1}
+  .bk-act{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:12.5px;padding:6px;border-radius:8px;font-family:var(--sans)}
+  .bk-act:hover{color:var(--ink);background:rgba(255,255,255,.08)}
+  .bk-act[data-act="del"]:hover{color:#F87171;background:rgba(248,113,113,.12)}
+  .bk-empty{color:var(--ink-3);font-size:13px;text-align:center;padding:44px 0}
+
   /* ---------- dialog ---------- */
   .overlay{
     position:fixed;inset:0;background:rgba(4,8,18,.62);backdrop-filter:blur(4px);
@@ -269,6 +310,7 @@
       <div class="toolbar">
         <span class="user-chip" id="userChip">◈ admin</span>
         <button type="button" class="tbtn auth-only" id="noteBtn">便签<span id="noteDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span></button>
+        <button type="button" class="tbtn auth-only" id="bmBtn">书签</button>
         <button type="button" class="tbtn reset" id="resetBtn">恢复默认</button>
         <button type="button" class="tbtn auth-only" id="editBtn">编辑</button>
         <button type="button" class="tbtn" id="loginBtn">登录</button>
@@ -326,6 +368,40 @@
     </div>
     <div class="dlg-actions">
       <button type="button" class="dlg-cancel" id="dlgCancel">取消</button>
+      <button type="submit" class="dlg-save">保存</button>
+    </div>
+  </form>
+</div>
+
+<aside class="bk" id="bmPanel" aria-label="书签管理器">
+  <div class="bk-head">
+    <span class="bk-title">书签</span>
+    <span class="bk-count" id="bmCount">0</span>
+    <input id="bmSearch" type="text" class="bk-search" placeholder="搜索书签…" autocomplete="off" aria-label="搜索书签">
+    <button type="button" class="bk-add" id="bmAddBtn">＋ 添加</button>
+    <button type="button" class="bk-close" id="bmClose" aria-label="关闭书签">✕</button>
+  </div>
+  <div class="bk-list" id="bmList"></div>
+</aside>
+
+<div class="overlay" id="bmOverlay" hidden>
+  <form class="dialog" id="bmForm" role="dialog" aria-modal="true" aria-labelledby="bmDlgTitle">
+    <h3 id="bmDlgTitle">添加书签</h3>
+    <div class="field" id="bmWrapName">
+      <label for="bmName">名称</label>
+      <input id="bmName" type="text" placeholder="例如：GitHub" autocomplete="off">
+    </div>
+    <div class="field" id="bmWrapUrl">
+      <label for="bmUrl">网址</label>
+      <input id="bmUrl" type="text" placeholder="例如：github.com" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="bmFolder">文件夹</label>
+      <input id="bmFolder" type="text" list="bmFolderList" placeholder="默认（可输入新文件夹名）" autocomplete="off">
+      <datalist id="bmFolderList"></datalist>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="dlg-cancel" id="bmCancel">取消</button>
       <button type="submit" class="dlg-save">保存</button>
     </div>
   </form>
@@ -422,7 +498,12 @@ var groupsEl=$('groups'),enginesEl=$('engines'),input=$('searchInput'),
     toastEl=$('toast'),searchForm=$('searchForm'),
     loginBtn=$('loginBtn'),logoutBtn=$('logoutBtn'),
     loginOverlay=$('loginOverlay'),loginForm=$('loginForm'),
-    lUser=$('lUser'),lPass=$('lPass'),loginErr=$('loginErr'),lWrapPass=$('lWrapPass');
+    lUser=$('lUser'),lPass=$('lPass'),loginErr=$('loginErr'),lWrapPass=$('lWrapPass'),
+    bmBtn=$('bmBtn'),bmPanel=$('bmPanel'),bmList=$('bmList'),bmCount=$('bmCount'),
+    bmSearch=$('bmSearch'),bmAddBtn=$('bmAddBtn'),bmCloseEl=$('bmClose'),
+    bmOverlay=$('bmOverlay'),bmForm=$('bmForm'),bmDlgTitle=$('bmDlgTitle'),
+    bmName=$('bmName'),bmUrl=$('bmUrl'),bmFolder=$('bmFolder'),bmFolderList=$('bmFolderList'),
+    bmWrapName=$('bmWrapName'),bmWrapUrl=$('bmWrapUrl');
 
 function persist(){
   api('links.php',{method:'POST',body:{links:links}}).then(function(d){
@@ -636,6 +717,8 @@ function applyAuth(){
       editBtn.classList.remove('active');
     }
     notePanel.classList.remove('open');
+    bmPanel.classList.remove('open');
+    bmOverlay.hidden=true;
   }
   updateNoteDot();
 }
@@ -674,6 +757,142 @@ logoutBtn.addEventListener('click',function(){
   showToast('已退出登录');
 });
 
+/* ================= 书签管理器（登录后可用） ================= */
+var bookmarks=[],bmEditId=null;
+function bmDomain(u){return String(u).replace(/^https?:\/\//,'').split('/')[0];}
+function bmGrad(u){
+  var h=0,s=String(u);
+  for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}
+  var h1=h%360,h2=(h1+46)%360;
+  return 'linear-gradient(135deg,hsl('+h1+',70%,55%),hsl('+h2+',75%,62%))';
+}
+function loadBookmarks(){
+  api('bookmarks.php').then(function(d){
+    if(d&&d.ok){bookmarks=d.bookmarks||[];renderBookmarks();}
+  }).catch(function(){});
+}
+function saveBookmarks(){
+  api('bookmarks.php',{method:'POST',body:{bookmarks:bookmarks}}).then(function(d){
+    if(!d||!d.ok)showToast(d&&d.error==='unauthorized'?'登录已过期，请重新登录':'书签保存失败，请重试');
+  }).catch(function(){showToast('网络异常，书签保存失败');});
+}
+function bmFiltered(){
+  var q=bmSearch.value.trim().toLowerCase();
+  if(!q)return bookmarks;
+  return bookmarks.filter(function(b){
+    return (b.name+' '+b.url+' '+(b.folder||'')).toLowerCase().indexOf(q)>=0;
+  });
+}
+function refreshFolderDatalist(){
+  var seen={},opts='';
+  bookmarks.forEach(function(b){var f=b.folder||'默认';if(!seen[f]){seen[f]=1;opts+='<option value="'+esc(f)+'">';}});
+  bmFolderList.innerHTML=opts;
+}
+function renderBookmarks(){
+  var list=bmFiltered();
+  bmCount.textContent=bookmarks.length;
+  if(!list.length){
+    bmList.innerHTML='<p class="bk-empty">'+(bookmarks.length?'没有匹配的书签':'还没有书签 · 点「＋ 添加」收藏第一个网址')+'</p>';
+    refreshFolderDatalist();return;
+  }
+  var byFolder={},order=[];
+  list.forEach(function(b){
+    var f=b.folder||'默认';
+    if(!byFolder[f]){byFolder[f]=[];order.push(f);}
+    byFolder[f].push(b);
+  });
+  var html='';
+  order.forEach(function(f){
+    html+='<div class="bk-folder">'+esc(f)+' · '+byFolder[f].length+'</div>';
+    byFolder[f].forEach(function(b){
+      html+='<div class="bk-item" data-id="'+esc(b.id)+'" role="link" tabindex="0">'
+        +'<span class="bk-ava" style="background:'+bmGrad(b.url)+'">'+esc(String(b.name).charAt(0)||'★')+'</span>'
+        +'<span class="bk-meta"><span class="bk-name">'+esc(b.name)+'</span><span class="bk-dom">'+esc(bmDomain(b.url))+'</span></span>'
+        +'<span class="bk-acts">'
+        +'<button type="button" class="bk-act" data-act="edit" data-id="'+esc(b.id)+'" aria-label="编辑书签 '+esc(b.name)+'">✎</button>'
+        +'<button type="button" class="bk-act" data-act="del" data-id="'+esc(b.id)+'" aria-label="删除书签 '+esc(b.name)+'">✕</button>'
+        +'</span></div>';
+    });
+  });
+  bmList.innerHTML=html;
+  refreshFolderDatalist();
+}
+function openBm(){bmPanel.classList.add('open');loadBookmarks();bmSearch.value='';setTimeout(function(){bmSearch.focus();},30);}
+function closeBm(){bmPanel.classList.remove('open');}
+function closeBmOverlay(){bmOverlay.hidden=true;bmEditId=null;}
+bmBtn.addEventListener('click',function(){
+  if(bmPanel.classList.contains('open'))closeBm();else openBm();
+});
+bmCloseEl.addEventListener('click',closeBm);
+bmSearch.addEventListener('input',renderBookmarks);
+function findBm(id){
+  for(var i=0;i<bookmarks.length;i++){if(bookmarks[i].id===id)return bookmarks[i];}
+  return null;
+}
+bmList.addEventListener('click',function(e){
+  var act=e.target.closest('.bk-act');
+  if(act){
+    e.stopPropagation();
+    var bm=findBm(act.dataset.id);
+    if(!bm)return;
+    if(act.dataset.act==='del'){removeBookmark(bm.id);return;}
+    bmEditId=bm.id;bmDlgTitle.textContent='编辑书签';
+    bmName.value=bm.name;bmUrl.value=bm.url;bmFolder.value=bm.folder||'';
+    bmWrapName.classList.remove('err');bmWrapUrl.classList.remove('err');
+    bmOverlay.hidden=false;setTimeout(function(){bmName.focus();},30);
+    return;
+  }
+  var item=e.target.closest('.bk-item');
+  if(item){
+    var b=findBm(item.dataset.id);
+    if(b)window.open(b.url,'_blank','noopener');
+  }
+});
+bmList.addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  var item=e.target.closest('.bk-item');
+  if(item&&e.target===item){
+    var b=findBm(item.dataset.id);
+    if(b)window.open(b.url,'_blank','noopener');
+  }
+});
+bmAddBtn.addEventListener('click',function(){
+  bmEditId=null;bmDlgTitle.textContent='添加书签';
+  bmName.value='';bmUrl.value='';bmFolder.value='';
+  bmWrapName.classList.remove('err');bmWrapUrl.classList.remove('err');
+  bmOverlay.hidden=false;setTimeout(function(){bmName.focus();},30);
+});
+$('bmCancel').addEventListener('click',closeBmOverlay);
+bmOverlay.addEventListener('click',function(e){if(e.target===bmOverlay)closeBmOverlay();});
+bmForm.addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=bmName.value.trim(),urlIn=bmUrl.value.trim(),folder=bmFolder.value.trim()||'默认';
+  if(!name){bmWrapName.classList.add('err');setTimeout(function(){bmWrapName.classList.remove('err');},700);bmName.focus();return;}
+  if(!urlIn){bmWrapUrl.classList.add('err');setTimeout(function(){bmWrapUrl.classList.remove('err');},700);bmUrl.focus();return;}
+  var url=urlIn;
+  if(!/^https?:\/\//i.test(url))url='https://'+url;
+  if(bmEditId){
+    for(var i=0;i<bookmarks.length;i++){
+      if(bookmarks[i].id===bmEditId){bookmarks[i].name=name;bookmarks[i].url=url;bookmarks[i].folder=folder;break;}
+    }
+  }else{
+    bookmarks.push({id:uid(),name:name,url:url,folder:folder});
+  }
+  saveBookmarks();renderBookmarks();
+  closeBmOverlay();
+});
+function removeBookmark(id){
+  var i=-1;
+  for(var k=0;k<bookmarks.length;k++){if(bookmarks[k].id===id){i=k;break;}}
+  if(i<0)return;
+  var item=bookmarks[i];
+  bookmarks.splice(i,1);saveBookmarks();renderBookmarks();
+  showToast('已删除书签「'+item.name+'」',function(){
+    bookmarks.splice(Math.min(i,bookmarks.length),0,item);
+    saveBookmarks();renderBookmarks();
+  });
+}
+
 /* ================= 键盘 ================= */
 function isTyping(t){
   return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
@@ -684,6 +903,8 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
     if(!loginOverlay.hidden){closeLogin();}
     else if(!overlay.hidden){closeDialog();}
+    else if(!bmOverlay.hidden){closeBmOverlay();}
+    else if(bmPanel.classList.contains('open')){closeBm();}
     else if(notePanel.classList.contains('open')){closeNote();}
     else if(document.activeElement===input){input.value='';input.blur();}
   }

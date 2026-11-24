@@ -8,7 +8,8 @@
 - **五个搜索引擎**：百度 / 必应 / 知乎 / B站 / 微博，一键切换；输入网址直接跳转；**搜索在新标签页打开**，导航页本身不被打断
 - **两组站点卡片**：办公协同（邮箱/文档/网盘/会议）+ 娱乐与生活（视频/音乐/购物/出行）
 - **管理员登录**：bcrypt 密码哈希存服务端，Session 会话（HttpOnly + SameSite），源码不含任何凭据
-- **登录后解锁**：编辑模式（增删改/撤销/恢复默认）+ 便签（自动保存）
+- **书签管理器（登录后）**：仿 Chrome 书签管理器——文件夹分组、搜索过滤、添加/编辑/删除（带撤销），点击新标签页打开；数据存服务端，多设备同步
+- **登录后解锁**：编辑模式（增删改/撤销/恢复默认）+ 便签（自动保存）+ 书签
 - **访客只读**：未登录时所有写接口返回 401，防暴力破解（连错 5 次锁 60 秒）
 - **零前端依赖**：单文件 HTML + 原生 JS，无框架无外部字体
 
@@ -29,6 +30,7 @@ MariaDB（nav_links / nav_note / nav_admin）
 | `api/auth.php` | `POST {action:"login"/"logout"}` | 登录 / 登出；`GET ?action=status` 查询会话状态 |
 | `api/links.php` | `GET` / `POST` | 公开读取全部链接；登录后整份替换保存 |
 | `api/note.php` | `GET` / `POST` | 登录后读写便签 |
+| `api/bookmarks.php` | `GET` / `POST` | 登录后读写书签（私人收藏，未登录 401） |
 
 ## 目录结构
 
@@ -39,7 +41,8 @@ MariaDB（nav_links / nav_note / nav_admin）
 │   ├── config.php              # 本地配置（含凭据，.gitignore 已排除，不提交）
 │   ├── auth.php                # 登录/登出/会话状态
 │   ├── links.php               # 链接数据接口
-│   └── note.php                # 便签接口
+│   ├── note.php                # 便签接口
+│   └── bookmarks.php           # 书签接口
 ├── deploy/                     # 可选：本机 + Cloudflare 隧道部署脚本
 │   ├── start-nav.ps1
 │   ├── keepalive-nav.ps1
@@ -83,6 +86,14 @@ CREATE TABLE IF NOT EXISTS nav_admin (
   id INT PRIMARY KEY,
   username VARCHAR(50) NOT NULL,
   pass_hash VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS nav_bookmarks (
+  id VARCHAR(20) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  url VARCHAR(500) NOT NULL,
+  folder VARCHAR(60) NOT NULL DEFAULT '默认',
+  pos INT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
