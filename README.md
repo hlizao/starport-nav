@@ -45,7 +45,8 @@ MariaDB（nav_links / nav_note / nav_admin）
 │   ├── keepalive-nav.ps1
 │   └── 启动导航站.bat
 └── docs/
-    └── 星港导航站公网部署技术文档.md   # 隧道部署方案的技术文档
+    ├── 星港导航站公网部署技术文档.md         # Cloudflare 隧道部署方案技术文档
+    └── 星港导航站前后端部署运维技术文档.md   # 虚拟主机 PHP+MariaDB 部署/验收/运维文档
 ```
 
 ## 部署到虚拟主机（PHP 8 + MariaDB）
