@@ -23,20 +23,35 @@
   }
   html,body{min-height:100%}
   body{
-    background:radial-gradient(1100px 700px at 50% -180px,#0D1530,var(--bg));
+    background:
+      radial-gradient(1200px 640px at 50% -160px,rgba(74,222,222,.10),transparent 60%),
+      linear-gradient(180deg,#0C2233 0%,#0A1B2C 12%,#071726 32%,#04101C 60%,#02090F 100%);
     color:var(--ink);
     font-family:var(--sans);
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
+    transition:background .6s;
   }
-  #stars{position:fixed;inset:0;z-index:0;pointer-events:none}
-  #jellyLayer{position:fixed;inset:0;z-index:0;pointer-events:none;display:none}
+  body.brand-ocean{
+    background:
+      radial-gradient(1200px 640px at 50% -160px,rgba(72,230,190,.09),transparent 60%),
+      linear-gradient(180deg,#0A2130 0%,#081A28 12%,#061624 32%,#04101B 60%,#02090F 100%);
+  }
+  #seaLayer{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #jellyLayer{position:fixed;inset:0;z-index:2;pointer-events:none;display:none}
   body.fx-on #jellyLayer{display:block}
   .aurora{
     position:fixed;inset:0;z-index:0;pointer-events:none;
     background:
-      radial-gradient(900px 520px at 72% -8%,rgba(99,102,241,.16),transparent 62%),
-      radial-gradient(760px 460px at 12% 12%,rgba(34,211,238,.10),transparent 60%);
+      radial-gradient(1000px 560px at 68% -10%,rgba(64,170,220,.12),transparent 62%),
+      radial-gradient(820px 500px at 14% 6%,rgba(74,222,222,.08),transparent 60%),
+      radial-gradient(1000px 720px at 50% 112%,rgba(2,8,14,.9),transparent 72%);
+  }
+  body.brand-ocean .aurora{
+    background:
+      radial-gradient(1000px 560px at 68% -10%,rgba(60,200,180,.12),transparent 62%),
+      radial-gradient(820px 500px at 14% 6%,rgba(90,240,210,.07),transparent 60%),
+      radial-gradient(1000px 720px at 50% 112%,rgba(2,8,14,.9),transparent 72%);
   }
   .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
   :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px}
@@ -347,6 +362,68 @@
   .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
   .toast button{background:none;border:none;color:var(--cyan);cursor:pointer;font-size:13px;font-weight:600;font-family:var(--sans)}
 
+  /* ---------- 通透浅海主题（预览：?mood=bright，默认深色不受影响） ---------- */
+  body.mood-bright{
+    --bg:#BFE7E4;
+    --ink:#0E2F38; --ink-2:#3A5E67; --ink-3:#64868D;
+    --line:rgba(8,60,70,.14); --line-strong:rgba(8,60,70,.28);
+    --card:rgba(255,255,255,.60); --card-hover:rgba(255,255,255,.82);
+    --cyan:#0E8F86; --violet:#6D5BD0;
+    background:
+      radial-gradient(1400px 700px at 50% -200px,rgba(255,255,255,.85),transparent 62%),
+      linear-gradient(180deg,#E9F8F2 0%,#CDF0F0 22%,#A5E0E6 50%,#7EC4CF 76%,#5DACB9 100%);
+  }
+  body.mood-bright .aurora{
+    background:
+      radial-gradient(1200px 620px at 50% -140px,rgba(255,255,255,.65),transparent 66%),
+      radial-gradient(900px 520px at 80% 4%,rgba(214,255,250,.35),transparent 62%),
+      radial-gradient(1200px 620px at 50% 118%,rgba(18,88,98,.16),transparent 70%);
+  }
+  body.mood-bright .tbtn,
+  body.mood-bright .chip,
+  body.mood-bright .search,
+  body.mood-bright .bk-search,
+  body.mood-bright .log-filter,
+  body.mood-bright .field input,
+  body.mood-bright .field select,
+  body.mood-bright .log-pbtn,
+  body.mood-bright .dlg-cancel,
+  body.mood-bright .foot kbd{
+    background:rgba(255,255,255,.58);
+    border-color:rgba(8,60,70,.16);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  }
+  body.mood-bright .tbtn:hover,
+  body.mood-bright .chip:hover,
+  body.mood-bright .log-pbtn:hover:not(:disabled),
+  body.mood-bright .dlg-cancel:hover{background:rgba(255,255,255,.82);border-color:rgba(8,60,70,.30)}
+  body.mood-bright .tbtn.active{background:rgba(255,255,255,.88);border-color:rgba(14,143,134,.62);color:#0E2F38}
+  body.mood-bright .chip[aria-pressed="true"]{color:#F2FFFC;background:#0E8F86;border-color:transparent}
+  body.mood-bright .card{background:rgba(255,255,255,.62);border-color:rgba(6,56,66,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 5px 16px rgba(14,76,88,.09)}
+  body.mood-bright .card:hover{box-shadow:0 10px 26px rgba(20,90,100,.16)}
+  body.mood-bright .search{box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 6px 24px rgba(20,90,100,.10)}
+  body.mood-bright .search:focus-within{box-shadow:0 0 0 3px rgba(14,143,134,.14),0 10px 30px rgba(14,143,134,.12)}
+  body.mood-bright .note,
+  body.mood-bright .bk{
+    background:rgba(255,255,255,.85);
+    box-shadow:0 18px 50px rgba(15,70,80,.22);
+  }
+  body.mood-bright .dialog{background:rgba(255,255,255,.94);box-shadow:0 24px 60px rgba(15,70,80,.25)}
+  body.mood-bright .toast{background:rgba(255,255,255,.92);box-shadow:0 10px 30px rgba(15,70,80,.2)}
+  body.mood-bright .overlay{background:rgba(208,240,242,.55);backdrop-filter:blur(6px)}
+  body.mood-bright .bk-act:hover{background:rgba(8,60,70,.08)}
+  body.mood-bright .count,
+  body.mood-bright .bk-count,
+  body.mood-bright .page-chip{
+    background:rgba(255,255,255,.78);
+    border-color:rgba(8,60,70,.22);
+    color:#3A5E67;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 2px 8px rgba(14,76,88,.10);
+  }
+  body.mood-bright .go,
+  body.mood-bright .bk-add,
+  body.mood-bright .dlg-save{color:#052022}
+
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
@@ -366,7 +443,7 @@
 </style>
 </head>
 <body>
-<canvas id="stars" aria-hidden="true"></canvas>
+<canvas id="seaLayer" aria-hidden="true"></canvas>
 <div class="aurora" aria-hidden="true"></div>
 <canvas id="jellyLayer" aria-hidden="true"></canvas>
 
@@ -1331,44 +1408,1248 @@ document.addEventListener('keydown',function(e){
   }
 });
 
-/* ================= 星尘背景 ================= */
-var cv=$('stars'),ctx=cv.getContext('2d');
-var REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-var DPR=Math.min(window.devicePixelRatio||1,2);
-var stars=[],W=0,H=0,mx=0,my=0;
-function seed(){
-  var n=Math.max(60,Math.min(170,Math.round(W*H/9000)));
-  stars=[];
-  for(var i=0;i<n;i++){
-    stars.push({x:Math.random()*W,y:Math.random()*H,z:.25+Math.random()*.75,r:.4+Math.random()*1.3,tw:Math.random()*Math.PI*2});
+/* ================= 海洋环境（深海动态背景 + 周期性洋流场） =================
+   独立 IIFE，可整体摘除（水母模块内置兜底流场，不影响运行）
+   预览参数（用于方案对比，不带参数时一律 A + star）：
+     ?sea=A|B|C   A=开阔水域（光柱+焦散+微粒+远景剪影）
+                  B=A + 极暗海床剪影（起伏暗脊+随流海草）
+                  C=极简（仅水层渐变+微粒）
+     ?brand=star|ocean  star=生物荧光浮游呈"星尘"质感（保留星港识别）
+                        ocean=纯海洋冷绿荧光、柔和光点
+   全局接口：window.__sea = {cfg, current(x,y,t)->{u,v,g}, surge(t), now()} */
+(function(){
+'use strict';
+var cv=document.getElementById('seaLayer');
+if(!cv||!cv.getContext)return;
+var ctx=cv.getContext('2d');
+
+/* ---- 配置：方案已定稿 B+star+bright；?sea= / ?brand= 预览参数已停用 ---- */
+var Q=null;
+try{Q=new URLSearchParams(location.search);}catch(e){}
+var CFG={sea:'B',brand:'star',mood:(((Q&&Q.get('mood'))||'bright')+'').toLowerCase()};
+if(CFG.mood!=='bright')CFG.mood='deep';
+/* 旧方案对比链接（如 ?sea=C&brand=star）：参数忽略并从地址栏清除 */
+try{
+  if(Q&&(Q.get('sea')||Q.get('brand'))){
+    Q.delete('sea');Q.delete('brand');
+    var qsPre=''+Q;
+    history.replaceState(null,'',location.pathname+(qsPre?'?'+qsPre:''));
   }
+}catch(e){}
+document.body.classList.add('brand-'+CFG.brand);
+if(CFG.mood==='bright')document.body.classList.add('mood-bright');
+
+var DPR=Math.min(window.devicePixelRatio||1,2);
+var W=0,H=0,mx=0,my=0;
+var reduce=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)').matches:false;
+var parts=[],rays=[],shadows=[],kelps=[],grass=[],anemones=[],fish=[],shoals=[],bubbles=[],vents=[],sand=[],reefCv=null,bgS=null,rayTex=null,causticTex=null,noiseTex=null;
+var t0=performance.now(),rafId=0,lastDrawT=0,lastBgT=0,fpsAcc=0,fpsN=0,lowFx=false;
+var mouseT=-1e4;                          /* 最近一次指针活动时间（鱼群好奇行为用） */
+var MOTION=reduce?0.5:1;                  /* 系统"减少动态"时：全场景半速缓动而非静止 */
+/* 离屏背景画布：光柱/焦散/沙床/水草等慢变化层按 12fps 重绘，主画布每帧仅贴图 */
+var bgc=document.createElement('canvas'),bgx=null;
+
+/* ---------- 洋流场：周期性（基础流缓慢摆动 + 两列行波 + 45s 涌流） ---------- */
+function surge(t){
+  var p=t%45;
+  return p<8?Math.sin(p/8*Math.PI):0;
 }
-function sizeCanvas(){
-  W=window.innerWidth;H=window.innerHeight;
-  cv.width=W*DPR;cv.height=H*DPR;
-  cv.style.width=W+'px';cv.style.height=H+'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  seed();
+function current(x,y,t){
+  var th=-0.14+0.40*Math.sin(t/40);          /* 基础流向缓慢摆动 ±23° */
+  var S=14+10*Math.sin(t/38+1.1);            /* 基础强度周期（38s） */
+  var g=1+0.8*surge(t);                      /* 涌流增益：每 45s 一次、持续 8s */
+  return {
+    u:(Math.cos(th)*S+8*Math.sin(y*0.004+t*0.12))*g,
+    v:(Math.sin(th)*S+6*Math.sin(x*0.0035-t*0.10))*g,
+    g:g
+  };
 }
-function paint(){
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#C9D8F2';
-  for(var i=0;i<stars.length;i++){
-    var s=stars[i];
-    s.tw+=.02;s.x-=s.z*.05;
-    if(s.x<-3){s.x=W+3;s.y=Math.random()*H;}
-    ctx.globalAlpha=(.18+.5*Math.abs(Math.sin(s.tw)))*s.z;
+window.__sea={cfg:CFG,current:current,surge:surge,
+  now:function(){return (performance.now()-t0)/1000;}};
+
+/* ================= 浅海生态：真实比例水草 + 珊瑚礁 + 礁鱼 ================= */
+/* 12 种真实物种；长度按 1cm ≈ H/281 px 换算（900px 高屏约 3.2px/cm） */
+var PLANT_COL={
+  posidonia:['#2E7A4B','#6FB57A'],   /* 波西多尼亚海草：长带状微扭叶 30-55cm */
+  zostera:['#3A8A5E','#7CC79A'],     /* 大叶藻/鳗草：细长柔软叶 40-80cm */
+  thalassia:['#2F8A5C','#6DBE8C'],   /* 泰来草：宽短钝头叶 10-24cm */
+  halodule:['#55A96A','#93D8A4'],    /* 二药草：针状叶 9-20cm 尖端凹口 */
+  sargassum:['#5E6B32','#A3B267'],   /* 马尾藻：主轴 + 小叶片 + 气囊 */
+  caulerpa:['#3F9B4C','#84D468'],    /* 总状蕨藻：匍匐茎 + 葡萄串 */
+  halimeda:['#79BC8D','#D8EFDA'],    /* 仙掌藻：钙化圆片串 */
+  padina:['#A98F5F','#E6D4A6'],      /* 团扇藻：扇形同心纹 */
+  dictyota:['#6D7A3A','#B2BE77'],    /* 网地藻：扁平二叉分枝 */
+  amphiroa:['#B4737F','#E9B3BC'],    /* 有壳珊瑚藻：粉红分节枝 */
+  gracilaria:['#8C5A50','#CBA095'],  /* 龙须菜：细长红褐 */
+  ulva:['#5CAB55','#A6DF8B']         /* 石莼：半透明薄片 */
+};
+var PLANT_SPEC={
+  posidonia:{L:[30,55],w:0.9,n:[5,6],sway:0.34},
+  zostera:{L:[40,80],w:0.5,n:[6,8],sway:0.44},
+  thalassia:{L:[10,24],w:0.9,n:[4,6],sway:0.24},
+  halodule:{L:[9,20],w:0.22,n:[6,7],sway:0.34},
+  sargassum:{L:[18,38],sway:0.26},
+  caulerpa:{L:[8,16],sway:0.16},
+  halimeda:{L:[7,15],sway:0.16},
+  padina:{L:[6,13],sway:0.16},
+  dictyota:{L:[7,14],sway:0.18},
+  amphiroa:{L:[5,11],sway:0.14},
+  gracilaria:{L:[14,30],w:0.22,n:[5,6],sway:0.34},
+  ulva:{L:[6,13],sway:0.12}
+};
+
+/* 单叶片：分段鞭状摆动（基部固定、叶尖滞后）+ 渐细填充 */
+function blade(x0,y0,len,lean,amp,phase,w0,col,hi,a,blunt){
+  var N=10,s,u,pts=[];
+  for(s=0;s<=N;s++){
+    u=s/N;
+    var sw=amp*Math.pow(u,1.25)*Math.sin(phase-u*2.05);
+    var arcu=len*0.09*Math.sin(Math.PI*u);   /* 固有弧度，避免静止时僵直 */
+    var hw=blunt?w0*(1-u*0.45):w0*(1-u*0.88);
+    pts.push([x0+lean*len*u+sw+arcu,y0-len*u,hw]);
+  }
+  ctx.globalAlpha=a;
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0]-pts[0][2],y0);
+  for(s=1;s<=N;s++)ctx.lineTo(pts[s][0]-pts[s][2],pts[s][1]);
+  for(s=N;s>=0;s--)ctx.lineTo(pts[s][0]+pts[s][2],pts[s][1]);
+  ctx.closePath();
+  ctx.fillStyle=col;ctx.fill();
+  if(a>=0.7){
     ctx.beginPath();
-    ctx.arc(s.x+mx*14*s.z,s.y+my*10*s.z,s.r,0,6.2832);
-    ctx.fill();
+    ctx.moveTo(pts[0][0]-pts[0][2],y0);
+    for(s=1;s<=N;s++)ctx.lineTo(pts[s][0]-pts[s][2]*0.85,pts[s][1]);
+    ctx.strokeStyle=hi;ctx.lineWidth=Math.max(0.6,w0*0.30);ctx.globalAlpha=a*0.75;ctx.stroke();
+    if(w0>1.6){
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0],y0);
+      for(s=1;s<=N;s++)ctx.lineTo(pts[s][0],pts[s][1]);
+      ctx.strokeStyle=hi;ctx.lineWidth=Math.max(0.5,w0*0.20);ctx.globalAlpha=a*0.30;ctx.stroke();
+    }
   }
   ctx.globalAlpha=1;
 }
-function loop(){paint();requestAnimationFrame(loop);}
-sizeCanvas();
-window.addEventListener('resize',sizeCanvas);
-window.addEventListener('mousemove',function(e){mx=e.clientX/W-.5;my=e.clientY/H-.5;},{passive:true});
-if(REDUCED){paint();}else{loop();}
+
+/* 水草：每丛按物种形态绘制，整体采样洋流方向与强度 */
+function drawGrass(g,t){
+  var cf=current(g.x,g.gy,t);
+  var mag=Math.min(1,Math.sqrt(cf.u*cf.u+cf.v*cf.v)/20);
+  var dir=cf.u>=0?1:-1;
+  var gust=0.85+0.95*surge(t)+0.22*Math.sin(t*0.23+g.ph);   /* 暗流常驻感增强 */
+  var lean=dir*(0.08+0.30*mag)*0.55*gust;
+  var a=g.layer?0.95:0.60;
+  var pal=PLANT_COL[g.sp]||PLANT_COL.zostera;
+  var col=pal[0],hi=pal[1];
+  var L=g.L;
+  ctx.globalAlpha=a*0.85;
+  ctx.fillStyle='rgba(86,104,66,0.9)';
+  ctx.beginPath();ctx.ellipse(g.x,g.gy,Math.max(2.4,g.w0*2.4),Math.max(1.2,g.w0*0.9),0,0,6.2832);ctx.fill();
+  ctx.globalAlpha=1;
+  switch(g.sp){
+    case 'posidonia':
+    case 'zostera':
+    case 'thalassia':
+    case 'halodule':
+    case 'gracilaria':{
+      var n=g.n;
+      for(var i=0;i<n;i++){
+        var o=(i-(n-1)/2);
+        var fade=1-Math.abs(o)/(n*0.75);
+        var bl=L*(0.70+0.30*fade)*(1+0.05*Math.sin(g.ph+i*1.7));
+        var ph=g.ph*1.7+i*1.29+t*(2.4+0.5*mag);
+        var amp=bl*g.sway*(0.95+0.80*gust);
+        blade(g.x+o*(g.w0*2.2+1.2),g.gy,bl,lean+o*0.02,amp,ph,g.w0*(1-Math.abs(o)*0.07),col,hi,a,g.blunt);
+      }
+      break;
+    }
+    case 'sargassum':{
+      var segs=5,px=g.x,py=g.gy;
+      var pts=[[px,py]];
+      for(var s2=1;s2<=segs;s2++){
+        var u2=s2/segs;
+        var sw2=Math.sin(t*1.1+g.ph-u2*1.6)*L*g.sway*0.5*u2*gust;
+        px=g.x+lean*L*u2+sw2;py=g.gy-L*u2;
+        pts.push([px,py]);
+      }
+      ctx.globalAlpha=a*0.9;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+      for(var s3=1;s3<pts.length;s3++)ctx.lineTo(pts[s3][0],pts[s3][1]);
+      ctx.strokeStyle=col;ctx.lineWidth=Math.max(1.6,g.w0*1.4);ctx.stroke();
+      for(var lf=1;lf<segs;lf++){
+        var bx=pts[lf][0],by=pts[lf][1];
+        var side=lf%2?1:-1;
+        blade(bx,by,L*0.22,lean*0.8+side*0.35,L*0.05,t*1.3+g.ph+lf,Math.max(0.9,g.w0*0.8),col,hi,a*0.9,0);
+        ctx.globalAlpha=a*0.9;ctx.fillStyle=hi;
+        ctx.beginPath();ctx.arc(bx+side*6,by-3,Math.max(2,L*0.028),0,6.2832);ctx.fill();
+      }
+      ctx.globalAlpha=1;
+      break;
+    }
+    case 'caulerpa':{
+      ctx.globalAlpha=a*0.9;ctx.strokeStyle=col;ctx.lineWidth=Math.max(1.2,g.w0);
+      ctx.beginPath();ctx.moveTo(g.x-L*0.4,g.gy+1);
+      ctx.quadraticCurveTo(g.x,g.gy-L*0.12,g.x+L*0.4,g.gy+1);ctx.stroke();
+      var nodes=5;
+      for(var cn=0;cn<nodes;cn++){
+        var nx=g.x+(-0.30+0.15*cn)*L,ny=g.gy-L*0.10-Math.abs(cn-2)*1.2;
+        var sway2=Math.sin(t*1.2+g.ph+cn*0.8)*L*0.05;
+        for(var gr=0;gr<3;gr++){
+          var gx2=nx+sway2+(gr-1)*3.4,gy2=ny-4-gr*3.2;
+          ctx.globalAlpha=a*(0.85-gr*0.08);
+          ctx.fillStyle=hi;
+          ctx.beginPath();ctx.arc(gx2,gy2,Math.max(1.6,L*0.035),0,6.2832);ctx.fill();
+          ctx.strokeStyle=col;ctx.lineWidth=0.7;ctx.globalAlpha=a*0.5;ctx.stroke();
+        }
+      }
+      ctx.globalAlpha=1;
+      break;
+    }
+    case 'halimeda':{
+      var hseg=5,hx=g.x,hy=g.gy;
+      for(var hs=0;hs<hseg;hs++){
+        var u3=hs/hseg;
+        var sw3=Math.sin(t*0.9+g.ph-u3*1.4)*L*0.07*gust;
+        hx=g.x+lean*L*u3*0.9+sw3;hy=g.gy-L*u3-L*0.03;
+        ctx.globalAlpha=a*0.95;
+        ctx.fillStyle=hi;
+        ctx.beginPath();ctx.ellipse(hx,hy,Math.max(2.2,L*0.055),Math.max(1.6,L*0.038),lean*0.5,0,6.2832);ctx.fill();
+        ctx.strokeStyle=col;ctx.lineWidth=0.8;ctx.globalAlpha=a*0.7;ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+      break;
+    }
+    case 'padina':{
+      ctx.globalAlpha=a*0.82;
+      ctx.save();
+      ctx.translate(g.x,g.gy);
+      ctx.rotate(lean*0.9);
+      var R=L;
+      ctx.beginPath();ctx.moveTo(0,0);
+      ctx.arc(0,0,R,-Math.PI*0.88,-Math.PI*0.12);
+      ctx.closePath();
+      ctx.fillStyle=col;ctx.fill();
+      ctx.strokeStyle=hi;ctx.lineWidth=1;ctx.globalAlpha=a*0.6;
+      for(var pr=1;pr<=3;pr++){
+        ctx.beginPath();ctx.arc(0,0,R*(0.30+pr*0.21),-Math.PI*0.86,-Math.PI*0.14);ctx.stroke();
+      }
+      ctx.restore();ctx.globalAlpha=1;
+      break;
+    }
+    case 'dictyota':{
+      ctx.globalAlpha=a*0.9;ctx.lineCap='round';
+      var fork2=function(x,y,len2,ang,w2,depth){
+        var sway3=Math.sin(t*1.0+g.ph+depth)*len2*0.06*gust;
+        var ex=x+Math.sin(ang+lean*0.5)*len2*0.7+sway3,ey=y-Math.cos(ang+lean*0.5)*len2;
+        ctx.strokeStyle=col;ctx.lineWidth=w2;
+        ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+(ex-x)*0.5,y-(y-ey)*0.55,ex,ey);ctx.stroke();
+        if(depth>0){
+          fork2(ex,ey,len2*0.72,ang-0.42,w2*0.72,depth-1);
+          fork2(ex,ey,len2*0.72,ang+0.38,w2*0.72,depth-1);
+        }
+      };
+      fork2(g.x,g.gy,L*0.55,lean*0.6,Math.max(2.4,g.w0*2.2),2);
+      ctx.globalAlpha=1;
+      break;
+    }
+    case 'amphiroa':{
+      ctx.globalAlpha=a*0.95;ctx.lineCap='round';
+      var aseg=6;
+      for(var as2=0;as2<aseg;as2++){
+        var u4=as2/aseg;
+        var ax=g.x+lean*L*u4+Math.sin(t*1.1+g.ph-u4*1.5)*L*0.08*gust;
+        var ay=g.gy-L*u4;
+        var ax2=g.x+lean*L*(u4+1/aseg)+Math.sin(t*1.1+g.ph-(u4+1/aseg)*1.5)*L*0.08*gust;
+        var ay2=g.gy-L*(u4+1/aseg);
+        ctx.strokeStyle=as2%2?hi:col;
+        ctx.lineWidth=Math.max(2.2,L*0.075);
+        ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax2,ay2);ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+      break;
+    }
+    case 'ulva':{
+      for(var us=0;us<2;us++){
+        var oa=(us-0.5)*L*0.7;
+        ctx.globalAlpha=a*0.45;
+        ctx.beginPath();
+        ctx.moveTo(g.x+oa*0.4,g.gy);
+        ctx.bezierCurveTo(g.x+oa*0.9+lean*L*0.3,g.gy-L*0.42,g.x+oa+lean*L*0.9,g.gy-L*0.78,g.x+oa*1.1+lean*L,g.gy-L*0.92);
+        ctx.bezierCurveTo(g.x+oa*0.5+lean*L*0.5,g.gy-L*0.65,g.x+oa*0.2,g.gy-L*0.28,g.x+oa*0.4,g.gy);
+        ctx.closePath();ctx.fillStyle=col;ctx.fill();
+        ctx.globalAlpha=a*0.85;ctx.strokeStyle=hi;ctx.lineWidth=0.9;ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+      break;
+    }
+  }
+  ctx.globalAlpha=1;
+}
+
+/* ---------- 珊瑚礁预渲染（远景带 + 近景带，一次性绘制） ---------- */
+function buildReef(){
+  if(CFG.mood!=='bright'){reefCv=null;return;}
+  if(!reefCv)reefCv=document.createElement('canvas');
+  reefCv.width=cv.width;reefCv.height=cv.height;
+  var rx=reefCv.getContext('2d');
+  rx.setTransform(DPR,0,0,DPR,0,0);
+  rx.clearRect(0,0,W,H);
+  var sc=Math.min(1.4,Math.max(0.7,H/900));
+  var farY=H*0.917,nearY=H*0.976;
+
+  function bedShadow(cx,cy,w2,a2){
+    var g=rx.createRadialGradient(cx,cy,0,cx,cy,w2);
+    g.addColorStop(0,'rgba(118,108,86,'+a2+')');
+    g.addColorStop(1,'rgba(118,108,86,0)');
+    rx.fillStyle=g;
+    rx.beginPath();rx.ellipse(cx,cy,w2,w2*0.22,0,0,6.2832);rx.fill();
+  }
+  function rock(cx,cy,s,tone){
+    var g=rx.createLinearGradient(cx-s,cy-s*0.9,cx+s*0.6,cy+s*0.3);
+    g.addColorStop(0,tone[0]);g.addColorStop(1,tone[1]);
+    rx.fillStyle=g;
+    rx.beginPath();
+    rx.moveTo(cx-s,cy+s*0.34);
+    rx.lineTo(cx-s*0.96,cy-s*0.10);
+    rx.lineTo(cx-s*0.55,cy-s*0.42);
+    rx.lineTo(cx-s*0.10,cy-s*0.50);
+    rx.lineTo(cx+s*0.40,cy-s*0.40);
+    rx.lineTo(cx+s*0.85,cy-s*0.10);
+    rx.lineTo(cx+s,cy+s*0.34);
+    rx.closePath();rx.fill();
+    rx.strokeStyle='rgba(255,250,235,0.35)';rx.lineWidth=Math.max(1,1.5*sc);
+    rx.beginPath();
+    rx.moveTo(cx-s*0.92,cy-s*0.08);
+    rx.lineTo(cx-s*0.52,cy-s*0.40);
+    rx.lineTo(cx-s*0.06,cy-s*0.48);
+    rx.lineTo(cx+s*0.42,cy-s*0.37);
+    rx.lineTo(cx+s*0.85,cy-s*0.08);
+    rx.stroke();
+  }
+  function brain(cx,cy,s){
+    var g=rx.createRadialGradient(cx-s*0.3,cy-s*0.5,0,cx,cy,s);
+    g.addColorStop(0,'#EACF8C');g.addColorStop(0.6,'#CCA65E');g.addColorStop(1,'#A98542');
+    rx.fillStyle=g;
+    rx.beginPath();rx.ellipse(cx,cy,s,s*0.52,0,Math.PI,0);rx.closePath();rx.fill();
+    rx.strokeStyle='rgba(122,90,42,0.62)';rx.lineWidth=Math.max(1,1.2*sc);
+    for(var i=1;i<=5;i++){
+      rx.beginPath();
+      for(var u2=0;u2<=1.0001;u2+=0.08){
+        var aa2=Math.PI+u2*Math.PI;
+        var rr2=s*(1-i*0.155);
+        var x2=cx+Math.cos(aa2)*rr2;
+        var y2=cy+Math.sin(aa2)*rr2*0.55+Math.sin(u2*Math.PI*4+i*1.3)*s*0.03;
+        if(u2===0)rx.moveTo(x2,y2);else rx.lineTo(x2,y2);
+      }
+      rx.stroke();
+    }
+    rx.strokeStyle='rgba(255,240,200,0.40)';
+    rx.beginPath();rx.ellipse(cx-s*0.06,cy-s*0.03,s*0.94,s*0.48,0,Math.PI+0.35,Math.PI*2-0.35);rx.stroke();
+  }
+  function staghorn(cx,cy,s,col,tip){
+    rx.lineCap='round';
+    var br=function(x,y,len,ang,w,d){
+      var ex=x+Math.sin(ang)*len,ey=y-Math.cos(ang)*len*0.9;
+      rx.beginPath();rx.moveTo(x,y);rx.quadraticCurveTo(x+Math.sin(ang)*len*0.5,y-Math.cos(ang)*len*0.55,ex,ey);
+      rx.strokeStyle=col;rx.lineWidth=w;rx.stroke();
+      if(d>0){
+        br(ex,ey,len*0.66,ang-0.45,w*0.68,d-1);
+        br(ex,ey,len*0.66,ang+0.40,w*0.68,d-1);
+        if(d===3)br(ex,ey,len*0.50,ang+0.05,w*0.60,d-1);
+      }else{
+        rx.beginPath();rx.arc(ex,ey,Math.max(1.2,w*0.55),0,6.2832);rx.fillStyle=tip;rx.fill();
+      }
+    };
+    br(cx,cy,s*0.55,0,Math.max(3,5*sc),3);
+  }
+  function table(cx,cy,s,col){
+    var N=26,i,a2,rr,x,y;
+    rx.fillStyle=col;
+    rx.beginPath();
+    for(i=0;i<=N;i++){
+      a2=i/N*Math.PI*2;
+      rr=s*(0.92+0.08*Math.sin(a2*5));
+      x=cx+Math.cos(a2)*rr;y=cy+Math.sin(a2)*rr*0.30-s*0.12;
+      if(i===0)rx.moveTo(x,y);else rx.lineTo(x,y);
+    }
+    rx.closePath();rx.fill();
+    rx.strokeStyle='rgba(255,250,240,0.45)';rx.lineWidth=Math.max(1,1.4*sc);rx.stroke();
+    rx.strokeStyle='rgba(150,110,70,0.70)';rx.lineWidth=Math.max(2,3.4*sc);
+    rx.beginPath();rx.moveTo(cx-s*0.28,cy+s*0.02);rx.lineTo(cx-s*0.12,cy+s*0.52);rx.stroke();
+    rx.beginPath();rx.moveTo(cx+s*0.30,cy+s*0.02);rx.lineTo(cx+s*0.20,cy+s*0.50);rx.stroke();
+  }
+  function pocillo(cx,cy,s){
+    for(var i=0;i<11;i++){
+      var a3=i/11*6.283+i*0.7,rr=s*(0.15+0.55*((i*37)%10)/10);
+      var bx=cx+Math.cos(a3)*rr,by=cy-Math.abs(Math.sin(a3))*rr*0.8;
+      var g=rx.createRadialGradient(bx-rr*0.18,by-rr*0.2,0,bx,by,Math.max(3,s*0.22));
+      g.addColorStop(0,'#F4CDD7');g.addColorStop(1,'#C6869B');
+      rx.fillStyle=g;rx.beginPath();rx.arc(bx,by,Math.max(2.5,s*0.20),0,6.2832);rx.fill();
+    }
+  }
+  function seaFan(cx,cy,s,col,edge){
+    rx.save();
+    rx.strokeStyle=col;rx.lineCap='round';
+    rx.lineWidth=Math.max(1.4,2.2*sc);
+    rx.beginPath();rx.moveTo(cx,cy);rx.quadraticCurveTo(cx-s*0.5,cy-s*0.9,cx-s*0.85,cy-s*1.45);
+    rx.moveTo(cx,cy);rx.quadraticCurveTo(cx+s*0.5,cy-s*0.9,cx+s*0.85,cy-s*1.45);
+    rx.stroke();
+    rx.globalAlpha=0.55;rx.lineWidth=Math.max(0.8,1.1*sc);
+    for(var i=0;i<9;i++){
+      var aa=-0.9+i/8*1.8;
+      var ex=cx+Math.sin(aa)*s*1.15,ey=cy-Math.cos(aa)*s*1.45;
+      rx.beginPath();rx.moveTo(cx,cy);rx.quadraticCurveTo(cx+Math.sin(aa)*s*0.55,cy-Math.cos(aa)*s*0.85,ex,ey);rx.stroke();
+    }
+    rx.strokeStyle=edge;
+    for(var k=1;k<=3;k++){
+      var rk=s*(0.45+k*0.28);
+      rx.beginPath();
+      for(var th=-0.85;th<=0.85;th+=0.12){
+        var px=cx+Math.sin(th)*rk,py=cy-Math.cos(th)*rk*1.15;
+        if(th<-0.84)rx.moveTo(px,py);else rx.lineTo(px,py);
+      }
+      rx.stroke();
+    }
+    rx.restore();
+  }
+  function sponges(cx,cy,s,col){
+    var n=3+((cx|0)%3);
+    for(var i=0;i<n;i++){
+      var w=s*0.16+(i%2)*s*0.05,h=s*(0.5+0.5*((i*53)%10)/10);
+      var bx=cx+(i-(n-1)/2)*s*0.30;
+      rx.fillStyle=col;
+      rx.beginPath();
+      rx.moveTo(bx-w,cy);rx.lineTo(bx-w*0.8,cy-h);
+      rx.quadraticCurveTo(bx,cy-h-w*1.1,bx+w*0.8,cy-h);
+      rx.lineTo(bx+w,cy);rx.closePath();rx.fill();
+      rx.fillStyle='rgba(10,40,50,0.55)';
+      rx.beginPath();rx.ellipse(bx,cy-h*0.98,w*0.55,w*0.30,0,0,6.2832);rx.fill();
+    }
+  }
+  function softFingers(cx,cy,s,col,tip){
+    for(var i=0;i<6;i++){
+      var a4=-0.7+i/5*1.4,len=s*(0.7+0.3*((i*29)%7)/7);
+      var tx=cx+Math.sin(a4)*len,ty=cy-Math.cos(a4)*len;
+      rx.strokeStyle=col;rx.lineWidth=Math.max(3,s*0.13);rx.lineCap='round';
+      rx.beginPath();rx.moveTo(cx,cy);rx.quadraticCurveTo(cx+Math.sin(a4)*len*0.4,cy-Math.cos(a4)*len*0.75,tx,ty);rx.stroke();
+      rx.fillStyle=tip;rx.beginPath();rx.arc(tx,ty,Math.max(1.6,s*0.06),0,6.2832);rx.fill();
+    }
+  }
+  function urchin(cx,cy,s){
+    rx.fillStyle='#2A2733';
+    rx.beginPath();rx.arc(cx,cy,s*0.36,0,6.2832);rx.fill();
+    rx.strokeStyle='rgba(35,30,45,0.85)';rx.lineWidth=Math.max(1,1.2*sc);
+    for(var i=0;i<18;i++){
+      var a5=i/18*6.283+0.2;
+      rx.beginPath();
+      rx.moveTo(cx+Math.sin(a5)*s*0.30,cy-Math.cos(a5)*s*0.30);
+      rx.lineTo(cx+Math.sin(a5)*s*0.62,cy-Math.cos(a5)*s*0.62);
+      rx.stroke();
+    }
+  }
+  function starfish(cx,cy,s){
+    rx.fillStyle='#E08A3C';
+    rx.beginPath();
+    for(var i=0;i<10;i++){
+      var a6=i/10*6.283-Math.PI/2,rr=i%2?s*0.30:s*0.55;
+      var x=cx+Math.cos(a6)*rr,y=cy+Math.sin(a6)*rr*0.6;
+      if(i===0)rx.moveTo(x,y);else rx.lineTo(x,y);
+    }
+    rx.closePath();rx.fill();
+    rx.strokeStyle='rgba(255,220,170,0.60)';rx.lineWidth=1;rx.stroke();
+  }
+
+  /* 远景带：低对比 + 雾化，后退做空气透视 */
+  rx.globalAlpha=0.62;
+  rx.filter='blur(1.6px)';
+  bedShadow(W*0.06,farY+6,60*sc,0.10);
+  bedShadow(W*0.82,farY+6,70*sc,0.10);
+  rock(W*0.045,farY,34*sc,['#6E7A7C','#4A5558']);
+  seaFan(W*0.135,farY,32*sc,'#B9688C','#E2A5BC');
+  brain(W*0.245,farY+2,30*sc);
+  softFingers(W*0.405,farY+2,26*sc,'#D2A6C4','#F5E3F0');
+  pocillo(W*0.545,farY+2,24*sc);
+  sponges(W*0.700,farY,26*sc,'#4E8C96');
+  seaFan(W*0.815,farY,30*sc,'#8E6BBE','#C7AEE3');
+  rock(W*0.93,farY,30*sc,['#6A7578','#465154']);
+  var fh=rx.createLinearGradient(0,H*0.895,0,H*0.955);
+  fh.addColorStop(0,'rgba(214,250,250,0.55)');
+  fh.addColorStop(1,'rgba(214,250,250,0.12)');
+  rx.fillStyle=fh;rx.fillRect(0,H*0.895,W,H*0.07);
+  rx.filter='none';
+  rx.globalAlpha=1;
+
+  /* 近景带：更饱和、更大、更清晰 */
+  bedShadow(W*0.11,nearY+8,90*sc,0.14);
+  bedShadow(W*0.47,nearY+8,80*sc,0.12);
+  bedShadow(W*0.86,nearY+8,95*sc,0.14);
+  rock(W*0.105,nearY,52*sc,['#5C6A6E','#333D41']);
+  staghorn(W*0.185,nearY+2,40*sc,'#BFA9DA','#F4ECFB');
+  brain(W*0.300,nearY+1,38*sc);
+  brain(W*0.425,nearY+1,32*sc);
+  staghorn(W*0.505,nearY+2,34*sc,'#C6B3DE','#F6EFFC');
+  pocillo(W*0.575,nearY+2,30*sc);
+  staghorn(W*0.675,nearY+2,36*sc,'#D3B2CF','#F7EAF3');
+  sponges(W*0.760,nearY,34*sc,'#5C6FB0');
+  softFingers(W*0.865,nearY+1,34*sc,'#E39079','#FFD9C8');
+  rock(W*0.945,nearY,46*sc,['#586569','#313B3F']);
+  urchin(W*0.055,nearY+12,30*sc);
+  urchin(W*0.720,nearY+14,26*sc);
+  starfish(W*0.360,nearY+16,22*sc);
+  starfish(W*0.895,nearY+18,20*sc);
+  rx.fillStyle='rgba(150,138,116,0.50)';
+  for(var rb=0;rb<18;rb++){
+    var rbx=W*(0.02+0.96*rb/17)+(Math.random()-0.5)*14;
+    var rby=nearY+(Math.random()-0.5)*10;
+    rx.beginPath();rx.ellipse(rbx,rby,3+Math.random()*4,2+Math.random()*2.4,0,0,6.2832);rx.fill();
+  }
+}
+
+/* 海葵 + 共生小丑鱼 */
+function drawAnemone(an,t){
+  var s=an.s,ph=an.ph;
+  var cf=current(an.x,an.gy,t);
+  var tilt=(cf.u/40)*0.06;
+  /* 柱身 */
+  ctx.globalAlpha=0.95;
+  var bgr=ctx.createLinearGradient(an.x-s*0.5,an.gy-s*0.5,an.x+s*0.5,an.gy);
+  bgr.addColorStop(0,an.c1);bgr.addColorStop(1,'rgba(118,68,84,0.92)');
+  ctx.fillStyle=bgr;
+  ctx.beginPath();
+  ctx.moveTo(an.x-s*0.52,an.gy);
+  ctx.bezierCurveTo(an.x-s*0.40,an.gy-s*0.35,an.x-s*0.34,an.gy-s*0.50,an.x-s*0.30,an.gy-s*0.55);
+  ctx.lineTo(an.x+s*0.30,an.gy-s*0.55);
+  ctx.bezierCurveTo(an.x+s*0.34,an.gy-s*0.50,an.x+s*0.40,an.gy-s*0.35,an.x+s*0.52,an.gy);
+  ctx.closePath();ctx.fill();
+  /* 口盘 */
+  ctx.fillStyle=an.c2;
+  ctx.beginPath();ctx.ellipse(an.x,an.gy-s*0.055-s*0.50,s*0.34,s*0.12,0,0,6.2832);ctx.fill();
+  /* 触手：从口盘放射如花冠 */
+  var n=16,cy0=an.gy-s*0.55;
+  for(var i=0;i<n;i++){
+    var a=-Math.PI*0.92+i/(n-1)*Math.PI*1.84;
+    var len=s*(0.50+0.30*Math.sin(i*2.1+ph));
+    var sw=Math.sin(t*1.2+ph+i*0.55)*0.16+Math.sin(t*0.6+ph*1.4)*0.09+tilt;
+    var ex=an.x+Math.cos(a)*len*(1+sw*0.9);
+    var ey=cy0-Math.sin(a)*len*0.95;
+    var mx=an.x+Math.cos(a)*len*0.45,my=cy0-Math.sin(a)*len*0.55;
+    ctx.globalAlpha=0.92;
+    ctx.strokeStyle=i%4===0?an.c3:an.c2;
+    ctx.lineWidth=Math.max(2.2,s*0.075);ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(an.x+Math.cos(a)*s*0.12,cy0);
+    ctx.quadraticCurveTo(mx,my,ex,ey);ctx.stroke();
+    ctx.fillStyle=an.c3;
+    ctx.beginPath();ctx.arc(ex,ey,Math.max(1.5,s*0.05),0,6.2832);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  for(var f=0;f<an.fishN;f++){
+    var fx=an.x+Math.sin(t*0.6+ph+f*2.1)*s*0.26;
+    var fy=cy0-s*0.10+Math.sin(t*1.2+ph+f*1.4)*3.5;
+    var face=Math.cos(t*0.6+ph+f)>0?1:-1;
+    ctx.save();ctx.translate(fx,fy);ctx.scale(face,1);
+    var bl=s*0.52;
+    ctx.fillStyle='#F58A3C';
+    ctx.beginPath();
+    ctx.moveTo(-bl*0.55,0);
+    ctx.bezierCurveTo(-bl*0.20,-bl*0.42,bl*0.30,-bl*0.40,bl*0.52,0);
+    ctx.bezierCurveTo(bl*0.30,bl*0.40,-bl*0.20,bl*0.42,-bl*0.55,0);
+    ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(255,252,246,0.92)';ctx.lineWidth=Math.max(1.2,bl*0.10);
+    ctx.beginPath();ctx.moveTo(-bl*0.10,-bl*0.30);ctx.lineTo(-bl*0.14,bl*0.30);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(bl*0.24,-bl*0.24);ctx.lineTo(bl*0.20,bl*0.24);ctx.stroke();
+    ctx.fillStyle='#F5A34F';
+    ctx.beginPath();ctx.moveTo(-bl*0.52,0);ctx.lineTo(-bl*0.70,-bl*0.22);ctx.lineTo(-bl*0.70,bl*0.22);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#241A14';ctx.beginPath();ctx.arc(bl*0.36,-bl*0.06,Math.max(0.9,bl*0.055),0,6.2832);ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* 礁鱼 */
+function drawFish(f,t){
+  var L=f.L,h=L*0.40;
+  var y=f.y+Math.sin(t*0.9+f.ph)*5;
+  var wig=Math.sin(t*((f.cur>0)?7.2:5.2)+f.ph)*0.6;   /* 好奇时尾摆更快 */
+  ctx.save();
+  ctx.translate(f.x,y);
+  ctx.scale(f.dir,1);
+  ctx.globalAlpha=0.88;
+  ctx.fillStyle=f.fin;
+  ctx.beginPath();
+  ctx.moveTo(-L*0.46,0);
+  ctx.lineTo(-L*0.64,-h*0.45+wig*3);
+  ctx.quadraticCurveTo(-L*0.58,0,-L*0.64,h*0.45+wig*3);
+  ctx.closePath();ctx.fill();
+  var bg=f.body;
+  ctx.fillStyle=bg;
+  ctx.beginPath();
+  ctx.moveTo(-L*0.46,0);
+  ctx.bezierCurveTo(-L*0.20,-h*0.95,L*0.20,-h*0.85,L*0.46,h*0.05);
+  ctx.bezierCurveTo(L*0.20,h*0.85,-L*0.22,h*0.90,-L*0.46,0);
+  ctx.closePath();ctx.fill();
+  ctx.globalAlpha=0.55;ctx.fillStyle=f.belly;
+  ctx.beginPath();ctx.ellipse(-L*0.02,h*0.34,L*0.30,h*0.30,0,0,6.2832);ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.fillStyle=f.fin;
+  ctx.beginPath();
+  ctx.moveTo(-L*0.05,-h*0.78);
+  ctx.quadraticCurveTo(-L*0.22,-h*1.38,-L*0.42,-h*0.55);
+  ctx.closePath();ctx.fill();
+  if(f.bars){
+    ctx.strokeStyle='rgba(40,44,58,0.75)';ctx.lineWidth=Math.max(1.2,L*0.045);
+    ctx.beginPath();ctx.moveTo(L*0.06,-h*0.55);ctx.lineTo(-L*0.02,h*0.55);ctx.stroke();
+    if(f.bars>1){ctx.beginPath();ctx.moveTo(L*0.24,-h*0.42);ctx.lineTo(L*0.18,h*0.46);ctx.stroke();}
+  }
+  ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(L*0.33,-h*0.10,Math.max(1.3,L*0.045),0,6.2832);ctx.fill();
+  ctx.fillStyle='#1C1F26';ctx.beginPath();ctx.arc(L*0.34,-h*0.10,Math.max(0.8,L*0.024),0,6.2832);ctx.fill();
+  ctx.restore();
+}
+
+/* 小鱼群 */
+function drawShoal(s,t){
+  var sd=s.dir||1;
+  for(var i=0;i<s.pts.length;i++){
+    var pt=s.pts[i];
+    var x=s.x+pt.dx+Math.sin(t*1.8+pt.ph)*7;
+    var y=s.y+pt.dy+Math.sin(t*1.3+pt.ph*1.7)*5;
+    var w2=Math.sin(t*6+pt.ph)*1.2*sd;
+    ctx.fillStyle='rgba(236,250,255,0.80)';
+    ctx.beginPath();ctx.ellipse(x,y,3.1,1.35,0,0,6.2832);ctx.fill();
+    ctx.strokeStyle='rgba(170,220,235,0.55)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(x-2.6*sd,y);ctx.lineTo(x-4.6*sd,y+w2);ctx.stroke();
+  }
+}
+
+/* ---------- 种子 ---------- */
+function seed(){
+  var mobile=Math.min(window.innerWidth,window.innerHeight)<640;
+  var n=CFG.mood==='bright'?(mobile?60:100):(CFG.sea==='C'?(mobile?50:110):(mobile?70:150));
+  parts=[];
+  for(var i=0;i<n;i++){
+    var kind;
+    if(CFG.brand==='star')kind=Math.random()<0.10?'star':'dust';
+    else kind=Math.random()<0.22?'glow':'snow';
+    parts.push({
+      x:Math.random()*W,y:Math.random()*H,
+      z:0.25+Math.random()*0.75,
+      r:(CFG.brand==='star'?0.5:0.7)+Math.random()*(CFG.brand==='star'?1.2:1.6),
+      tw:Math.random()*Math.PI*2,
+      kind:kind
+    });
+  }
+  rays=[];
+  if(CFG.sea!=='C'){
+    var nr=mobile?3:7;
+    for(var r=0;r<nr;r++){
+      rays.push({
+        x:Math.random()*W,w:120+Math.random()*170,
+        tilt:-0.30+Math.random()*0.12,
+        ph:Math.random()*Math.PI*2,a:0.045+Math.random()*0.035
+      });
+    }
+  }
+  shadows=[];
+  if(CFG.sea!=='C'){
+    for(var d=0;d<3;d++){
+      shadows.push({x:Math.random()*W,y:Math.random()*H,s:130+Math.random()*170,ph:Math.random()*Math.PI*2});
+    }
+  }
+  kelps=[];
+  if(CFG.sea==='B'){
+    var kn=mobile?3:6;
+    for(var k=0;k<kn;k++){
+      var bl=[],bn=3+Math.round(Math.random()*2);
+      for(var bi=0;bi<bn;bi++)bl.push({o:(bi-(bn-1)/2)*0.22,hl:0.5+Math.random()*0.5,w:2.4+Math.random()*1.8});
+      kelps.push({x:W*(0.06+0.88*Math.random()),h:70+Math.random()*110,ph:Math.random()*Math.PI*2,lean:-0.2+Math.random()*0.4,blades:bl});
+    }
+  }
+/* 浅海生态：真实比例水草床 + 珊瑚礁 + 礁鱼 + 气泡 */
+  grass=[];anemones=[];fish=[];shoals=[];bubbles=[];sand=[];
+  if(CFG.mood==='bright'){
+    var mobile=Math.min(window.innerWidth,window.innerHeight)<640;
+    var SC=H/281;                                  /* 1cm 像素换算（900 高屏约 3.2px） */
+    var spNames=['posidonia','zostera','thalassia','halodule','sargassum','caulerpa','halimeda','padina','dictyota','amphiroa','gracilaria','ulva'];
+    /* 高草权重：真实海草床以带状长叶为主 */
+    var weighted=['posidonia','posidonia','zostera','zostera','zostera','thalassia','thalassia','halodule','halodule','gracilaria','gracilaria','sargassum','caulerpa','halimeda','padina','dictyota','amphiroa','ulva'];
+    var beds=[0.08,0.26,0.44,0.62,0.80,0.93];
+    var tufts=mobile?16:30;
+    for(var ti=0;ti<tufts;ti++){
+      var spn=weighted[Math.floor(Math.random()*weighted.length)],spec=PLANT_SPEC[spn];
+      var bed=beds[Math.floor(Math.random()*beds.length)];
+      var near=ti%2===1;
+      var Lcm=spec.L[0]+Math.random()*(spec.L[1]-spec.L[0]);
+      grass.push({
+        sp:spn,x:W*(bed+(Math.random()-0.5)*0.09),
+        layer:near?1:0,
+        gy:H*(near?0.972:0.918)+(Math.random()-0.5)*7,
+        L:Lcm*SC*(near?1:0.80),
+        w0:Math.max(0.55,(spec.w||0.5)*SC*0.5)*(near?1.30:1),
+        n:spec.n?spec.n[0]+Math.round(Math.random()*(spec.n[1]-spec.n[0])):0,
+        sway:spec.sway||0.14,blunt:spec.blunt||0,ph:Math.random()*6.283
+      });
+    }
+    grass.sort(function(a,b){return a.layer-b.layer;});
+    /* 三丛主景高草：保证画面中段有清晰摆动的带状叶 */
+    var heroes=[0.20,0.50,0.80];
+    for(var hi2=0;hi2<heroes.length;hi2++){
+      var hsp=hi2===1?'zostera':'posidonia',hspec=PLANT_SPEC[hsp];
+      grass.push({sp:hsp,x:W*(heroes[hi2]+(Math.random()-0.5)*0.04),layer:1,
+        gy:H*0.975+(Math.random()-0.5)*4,
+        L:(hspec.L[1]*0.92)*SC,w0:Math.max(0.9,hspec.w*SC*0.5)*1.35,
+        n:hi2===1?7:6,sway:hspec.sway*1.15,blunt:0,ph:Math.random()*6.283});
+    }
+    grass.sort(function(a,b){return a.layer-b.layer;});
+    /* 海葵（含共生小丑鱼） */
+    var anCols=[['#C0607A','#E88BA6','#FFC9DA'],['#9E5FA8','#C88FD0','#EDCBEE'],['#4E9C7A','#7FCBA5','#C9F0D8']];
+    var ans=mobile?2:3;
+    for(var ai=0;ai<ans;ai++){
+      var ap=[0.14,0.62,0.88][ai%3];
+      var ac=anCols[ai%3];
+      anemones.push({x:W*(ap+(Math.random()-0.5)*0.04),gy:H*0.965+Math.random()*6,
+        s:(30+Math.random()*12)*Math.max(0.8,Math.min(1.3,H/900)),
+        c1:ac[0],c2:ac[1],c3:ac[2],ph:Math.random()*6.283,fishN:ai===1?0:1});
+    }
+    /* 礁鱼 */
+    var KINDS=[
+      {body:'#F2C23C',body2:'#E8A81F',belly:'#FCE7A8',fin:'#E39A1E',bars:0,L:[46,66]},
+      {body:'#3A6ED8',body2:'#2B4FB0',belly:'#BCD4F2',fin:'#1F3B8C',bars:1,L:[44,62]},
+      {body:'#F7F8F4',body2:'#E6EAE7',belly:'#FFFFFF',fin:'#E7D9A8',bars:2,L:[40,56]},
+      {body:'#F0836B',body2:'#E06A52',belly:'#FBD3C8',fin:'#D9553F',bars:0,L:[32,46]}
+    ];
+    var fn=mobile?4:7;
+    for(var fi=0;fi<fn;fi++){
+      var kd=KINDS[fi%KINDS.length];
+      var LL=(kd.L[0]+Math.random()*(kd.L[1]-kd.L[0]))*Math.max(0.8,Math.min(1.25,H/900));
+      fish.push({x:Math.random()*W,y:H*(0.60+0.26*Math.random()),L:LL*0.90,
+        body:kd.body,body2:kd.body2,belly:kd.belly,fin:kd.fin,bars:kd.bars,
+        dir:Math.random()<0.5?1:-1,v:26+Math.random()*22,ph:Math.random()*6.283,cur:0});
+    }
+    /* 小鱼群 */
+    var sn=mobile?1:2;
+    for(var si2=0;si2<sn;si2++){
+      var pts2=[];
+      for(var pi2=0;pi2<9;pi2++)pts2.push({dx:(Math.random()-0.5)*44,dy:(Math.random()-0.5)*28,ph:Math.random()*6.283});
+      shoals.push({x:Math.random()*W,y:H*(0.52+0.16*si2),v:18+Math.random()*10,ph:Math.random()*6.283,pts:pts2});
+    }
+    /* 沙粒 */
+    var sdn=mobile?220:900;
+    for(var si3=0;si3<sdn;si3++){
+      sand.push({x:Math.random()*W,y:H*(0.845+Math.random()*0.155),r:0.6+Math.random()*1.7,a:0.12+Math.random()*0.18});
+    }
+    /* 气泡喷口：沙床上不定时成串冒泡（气泡运行时生成，见 step） */
+    var nv=mobile?3:5;
+    for(var vi=0;vi<nv;vi++){
+      vents.push({x:W*(0.10+0.80*Math.random()),y:H*(0.945+Math.random()*0.030),
+        t:0.5+Math.random()*2.5});
+    }
+  }
+}
+/* ---------- 光照纹理 + 静态背景（预渲染，避免每帧大面积渐变） ---------- */
+function buildTex(){
+  if(!rayTex){
+    rayTex=document.createElement('canvas');
+    rayTex.width=128;rayTex.height=512;
+    var t1=rayTex.getContext('2d');
+    var g1=t1.createLinearGradient(0,0,0,512);
+    g1.addColorStop(0,'rgba(255,255,255,0.55)');
+    g1.addColorStop(0.35,'rgba(240,255,252,0.50)');
+    g1.addColorStop(0.75,'rgba(225,250,250,0.16)');
+    g1.addColorStop(1,'rgba(210,245,245,0)');
+    t1.fillStyle=g1;t1.fillRect(0,0,128,512);
+    var m1=t1.createLinearGradient(0,0,128,0);
+    m1.addColorStop(0,'rgba(0,0,0,0)');
+    m1.addColorStop(0.30,'rgba(0,0,0,0.85)');
+    m1.addColorStop(0.50,'rgba(0,0,0,1)');
+    m1.addColorStop(0.70,'rgba(0,0,0,0.85)');
+    m1.addColorStop(1,'rgba(0,0,0,0)');
+    t1.globalCompositeOperation='destination-in';
+    t1.fillStyle=m1;t1.fillRect(0,0,128,512);
+    t1.globalCompositeOperation='source-over';
+  }
+  if(!causticTex){
+    causticTex=document.createElement('canvas');
+    causticTex.width=512;causticTex.height=64;
+    var t2=causticTex.getContext('2d');
+    t2.lineCap='round';
+    for(var i=0;i<3;i++){
+      t2.beginPath();
+      for(var x=0;x<=512;x+=8){
+        var y=32+Math.sin(x*0.024+i*2.1)*10+Math.sin(x*0.011+i*1.3)*6;
+        if(x===0)t2.moveTo(x,y);else t2.lineTo(x,y);
+      }
+      t2.strokeStyle='rgba(255,255,255,'+(0.85-i*0.22)+')';
+      t2.lineWidth=(i===0?7:4);t2.stroke();
+    }
+  }
+  if(!noiseTex){
+    noiseTex=document.createElement('canvas');
+    noiseTex.width=96;noiseTex.height=96;
+    var nt=noiseTex.getContext('2d');
+    var id=nt.createImageData(96,96);
+    for(var ni=0;ni<id.data.length;ni+=4){
+      var nv=Math.random()*255|0;
+      id.data[ni]=nv;id.data[ni+1]=nv;id.data[ni+2]=nv;id.data[ni+3]=20;
+    }
+    nt.putImageData(id,0,0);
+  }
+}
+/* 静态背景：水体渐变/阳光辉斑/雾/沙床沙脊/珊瑚礁/沙粒/扎根影/暗角 */
+function buildStatic(){
+  if(CFG.mood!=='bright'){bgS=null;return;}
+  if(!bgS)bgS=document.createElement('canvas');
+  bgS.width=cv.width;bgS.height=cv.height;
+  var s2=bgS.getContext('2d');
+  s2.setTransform(DPR,0,0,DPR,0,0);
+  s2.clearRect(0,0,W,H);
+  var wg=s2.createLinearGradient(0,0,0,H);
+  wg.addColorStop(0,'#A6DCD6');
+  wg.addColorStop(0.28,'#94D0D2');
+  wg.addColorStop(0.58,'#7BC2CC');
+  wg.addColorStop(0.82,'#66B0BC');
+  wg.addColorStop(1,'#5CA6B2');
+  s2.fillStyle=wg;s2.fillRect(0,0,W,H);
+  s2.globalCompositeOperation='lighter';
+  var sunX=W*0.34;
+  var sg2=s2.createRadialGradient(sunX,-H*0.12,0,sunX,-H*0.12,W*0.62);
+  sg2.addColorStop(0,'rgba(255,255,255,0.20)');
+  sg2.addColorStop(0.42,'rgba(242,255,252,0.12)');
+  sg2.addColorStop(1,'rgba(232,255,250,0)');
+  s2.fillStyle=sg2;s2.fillRect(0,0,W,H*0.62);
+  s2.globalCompositeOperation='source-over';
+  var hz=s2.createLinearGradient(0,H*0.42,0,H*0.92);
+  hz.addColorStop(0,'rgba(228,252,250,0)');
+  hz.addColorStop(1,'rgba(228,252,250,0.16)');
+  s2.fillStyle=hz;s2.fillRect(0,H*0.42,W,H*0.50);
+  var sg=s2.createLinearGradient(0,H*0.795,0,H);
+  sg.addColorStop(0,'rgba(247,238,214,0)');
+  sg.addColorStop(0.35,'rgba(245,234,205,0.86)');
+  sg.addColorStop(1,'rgba(233,216,180,0.99)');
+  s2.fillStyle=sg;s2.fillRect(0,H*0.795,W,H*0.205);
+  var ridgeY=function(rx0){
+    return H*0.884-15*Math.sin(rx0*0.0042+1.9)-8*Math.sin(rx0*0.012+0.4);
+  };
+  s2.beginPath();s2.moveTo(0,H);
+  for(var rxx=0;rxx<=W;rxx+=22)s2.lineTo(rxx,ridgeY(rxx));
+  s2.lineTo(W,H);s2.closePath();
+  s2.fillStyle='rgba(242,230,199,0.50)';s2.fill();
+  s2.beginPath();
+  for(var rxx2=0;rxx2<=W;rxx2+=22){
+    var ryy=ridgeY(rxx2);
+    if(rxx2===0)s2.moveTo(rxx2,ryy);else s2.lineTo(rxx2,ryy);
+  }
+  s2.strokeStyle='rgba(255,253,244,0.30)';s2.lineWidth=7;s2.stroke();
+  s2.strokeStyle='rgba(255,253,244,0.78)';s2.lineWidth=1.5;s2.stroke();
+  if(reefCv&&reefCv.width)s2.drawImage(reefCv,0,0,W,H);
+  for(var sd=0;sd<sand.length;sd++){
+    var sdo=sand[sd];
+    s2.fillStyle='rgba(158,141,110,'+sdo.a+')';
+    s2.beginPath();s2.arc(sdo.x,sdo.y,sdo.r,0,Math.PI*2);s2.fill();
+  }
+  for(var gi=0;gi<grass.length;gi++){
+    var pp=grass[gi],pr=(pp.layer?9:6)*(0.85+0.3*Math.sin(pp.ph));
+    s2.fillStyle='rgba(146,134,106,0.20)';
+    s2.beginPath();s2.ellipse(pp.x+3,pp.gy+1.5,pr,pr*0.26,0,0,Math.PI*2);s2.fill();
+  }
+  /* 沙面流纹（水流冲刷的浅纹） */
+  s2.strokeStyle='rgba(196,182,152,0.32)';s2.lineWidth=1;
+  for(var rp=0;rp<7;rp++){
+    s2.beginPath();
+    for(var x4=0;x4<=W;x4+=26){
+      var y4=H*(0.895+rp*0.016)+Math.sin(x4*0.006+rp*1.7)*3.5+Math.sin(x4*0.013+rp)*1.6;
+      if(x4===0)s2.moveTo(x4,y4);else s2.lineTo(x4,y4);
+    }
+    s2.stroke();
+  }
+  var vg=s2.createRadialGradient(W*0.5,H*0.42,H*0.34,W*0.5,H*0.52,H*0.98);
+  vg.addColorStop(0,'rgba(12,66,74,0)');
+  vg.addColorStop(1,'rgba(12,66,74,0.16)');
+  s2.fillStyle=vg;s2.fillRect(0,0,W,H);
+  /* 胶片颗粒：打破平涂感 */
+  if(noiseTex){
+    var np=s2.createPattern(noiseTex,'repeat');
+    s2.globalAlpha=0.55;s2.fillStyle=np;s2.fillRect(0,0,W,H);s2.globalAlpha=1;
+  }
+}
+
+function fit(){
+  W=window.innerWidth;H=window.innerHeight;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  cv.style.width=W+'px';cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  bgc.width=cv.width;bgc.height=cv.height;
+  bgx=bgc.getContext('2d');
+  bgx.setTransform(DPR,0,0,DPR,0,0);
+  lastBgT=0;
+  seed();
+  buildReef();
+  buildTex();
+  buildStatic();
+}
+
+/* ---------- 物理步进（微粒/远景/气泡/礁鱼由洋流与自身巡游驱动） ---------- */
+function step(dt,t){
+  var i,p,cf;
+  for(i=0;i<parts.length;i++){
+    p=parts[i];
+    cf=current(p.x,p.y,t);
+    p.x+=cf.u*p.z*dt*0.55;
+    p.y+=cf.v*p.z*dt*0.55;
+    p.tw+=dt*(0.35+p.z*0.5);
+    if(p.x<-8)p.x=W+8; if(p.x>W+8)p.x=-8;
+    if(p.y<-8)p.y=H+8; if(p.y>H+8)p.y=-8;
+  }
+  for(i=0;i<shadows.length;i++){
+    var s=shadows[i];
+    cf=current(s.x,s.y,t);
+    s.x+=cf.u*0.45*dt;s.y+=cf.v*0.30*dt;s.ph+=dt*0.06;
+    if(s.x<-s.s)s.x=W+s.s; if(s.x>W+s.s)s.x=-s.s;
+    if(s.y<-s.s)s.y=H+s.s; if(s.y>H+s.s)s.y=-s.s;
+  }
+  for(i=0;i<kelps.length;i++)kelps[i].ph+=dt*0.5;
+  /* 气泡：喷口不定时成串冒出，浮力加速上浮 + 蛇形摆动，近水面渐散 */
+  var bCap=Math.min(window.innerWidth,window.innerHeight)<640?14:26;
+  for(i=0;i<vents.length;i++){
+    var vt=vents[i];
+    vt.t-=dt;
+    if(vt.t<=0){
+      vt.t=1.4+Math.random()*3.4;                      /* 串间隔 1.4~4.8s，不定时 */
+      var burst=1+(Math.random()<0.38?1:0)+(Math.random()<0.16?2:0);
+      for(var bj=0;bj<burst;bj++){
+        if(bubbles.length>=bCap)break;
+        var br=1.6+Math.random()*3.8;
+        bubbles.push({x:vt.x+(Math.random()-0.5)*10,y:vt.y-Math.random()*12,
+          r:br,vy:20+br*6,ph:Math.random()*6.283,
+          a:0.42+Math.random()*0.40,fade:1});
+      }
+    }
+  }
+  for(i=bubbles.length-1;i>=0;i--){
+    var bb=bubbles[i];
+    bb.vy+=bb.r*2.4*dt;                                /* 浮力：上升中加速 */
+    var vcap=26+bb.r*11;                               /* 终端速度：大气泡更快 */
+    if(bb.vy>vcap)bb.vy=vcap;
+    bb.y-=bb.vy*dt;
+    var cb=current(bb.x,bb.y,t);
+    bb.x+=(cb.u*0.30+Math.sin(t*(2.0+bb.r*0.55)+bb.ph)*bb.r*3.4)*dt;
+    if(bb.x<-10)bb.x=W+10;else if(bb.x>W+10)bb.x=-10;
+    if(bb.y<H*0.13)bb.fade-=dt*1.6;                    /* 近水面渐散 */
+    if(bb.fade<=0)bubbles.splice(i,1);
+  }
+  /* 礁鱼巡游：底部来回游动，边界折返不瞬移；指针靠近时好奇聚拢观察 */
+  var mpx=(mx+0.5)*W,mpy=(my+0.5)*H;
+  var mFresh=(performance.now()-mouseT)<2500;
+  for(i=0;i<fish.length;i++){
+    var f2=fish[i];
+    if(f2.px===undefined){f2.px=W*(0.12+0.76*Math.random());f2.py=H*(0.62+0.24*Math.random());f2.turnT=4+Math.random()*8;}
+    var dxm=mpx-f2.x,dym=mpy-f2.y;
+    var dm=Math.sqrt(dxm*dxm+dym*dym);
+    var tx,ty,sp;
+    if(mFresh&&dm<300){
+      /* 好奇：游近指针，停在观察半径上绕圈打量 */
+      f2.cur=(f2.cur||0)+dt;
+      var ring=64+f2.L*0.9;
+      if(dm>ring+14){
+        var inv=1/Math.max(1,dm);
+        tx=mpx-dxm*inv*ring;ty=mpy-dym*inv*ring;
+        sp=f2.v*1.3+34;
+      }else{
+        var oa=t*0.9+f2.ph;
+        tx=mpx+Math.cos(oa)*ring;ty=mpy+Math.sin(oa)*ring*0.55;
+        sp=f2.v*0.8;
+      }
+    }else{
+      f2.cur=0;
+      f2.turnT-=dt;
+      if(f2.turnT<=0||Math.abs(f2.x-f2.px)<26){
+        f2.px=f2.x<W*0.5?W*(0.60+Math.random()*0.32):W*(0.08+Math.random()*0.32);
+        f2.py=H*(0.62+Math.random()*0.24);
+        f2.turnT=5+Math.random()*9;
+      }
+      tx=f2.px;ty=f2.py+Math.sin(t*0.5+f2.ph)*10;
+      sp=f2.v;
+    }
+    var nvx=tx-f2.x,nvy=ty-f2.y;
+    var dl=Math.sqrt(nvx*nvx+nvy*nvy);
+    if(dl>1.5){
+      var mv=Math.min(dl,sp*dt);
+      f2.x+=nvx/dl*mv;f2.y+=nvy/dl*mv;
+      if(Math.abs(nvx)>16)f2.dir=nvx>0?1:-1;
+    }
+    if(f2.y<H*0.08)f2.y=H*0.08;else if(f2.y>H*0.92)f2.y=H*0.92;
+    f2.ph+=dt*0.6;
+  }
+  /* 小鱼群：带内往返巡游，边界折返 */
+  for(i=0;i<shoals.length;i++){
+    var sh2=shoals[i];
+    if(sh2.dir===undefined)sh2.dir=Math.random()<0.5?1:-1;
+    sh2.x+=sh2.v*sh2.dir*dt;
+    sh2.y+=Math.sin(t*0.35+sh2.ph)*8*dt;
+    if(sh2.dir>0&&sh2.x>W-60)sh2.dir=-1;
+    else if(sh2.dir<0&&sh2.x<60)sh2.dir=1;
+  }
+}
+
+/* ---------- 绘制背景层（慢变化：光柱/焦散/远景/沙床/水草） ---------- */
+function renderBg(t){
+  if(CFG.mood==='bright')return; /* 浅色使用静态层 bgS + 逐帧光束 */
+  var g=1+0.8*surge(t),i;
+  var prev=ctx;ctx=bgx;
+  ctx.clearRect(0,0,W,H);
+
+  /* 1) 光柱：仅深色主题（浅色使用下方 5.3 的丁达尔光束） */
+  if(rays.length&&CFG.mood!=='bright'){
+    ctx.globalCompositeOperation='lighter';
+    for(i=0;i<rays.length;i++){
+      var ray=rays[i];
+      var tilt=ray.tilt+Math.sin(t*0.05+ray.ph)*0.015;
+      var xb=ray.x+Math.sin(t*0.02+ray.ph)*60+mx*10;
+      var wd=ray.w*(1+0.12*Math.sin(t*0.04+ray.ph));
+      var al=ray.a*(0.75+0.35*(g-1))*(CFG.mood==='bright'?2.4:1);
+      var top=-H*0.05,bot=H*0.95,dxTop=Math.tan(tilt)*(bot-top);
+      var grd=ctx.createLinearGradient(0,top,0,bot);
+      grd.addColorStop(0,CFG.mood==='bright'?'rgba(255,255,255,'+al+')':(CFG.brand==='ocean'?'rgba(140,240,215,'+al+')':'rgba(150,214,240,'+al+')'));
+      grd.addColorStop(0.55,CFG.mood==='bright'?'rgba(255,255,255,'+(al*0.5)+')':'rgba(120,190,215,'+(al*0.45)+')');
+      grd.addColorStop(1,'rgba(100,170,200,0)');
+      ctx.fillStyle=grd;
+      ctx.beginPath();
+      ctx.moveTo(xb,top);ctx.lineTo(xb+wd,top);
+      ctx.lineTo(xb+wd+dxTop,bot);ctx.lineTo(xb+dxTop,bot);
+      ctx.closePath();ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  /* 2) 焦散光带：仅深色主题 */
+  if(rays.length&&!lowFx&&CFG.mood!=='bright'){
+    ctx.globalCompositeOperation='lighter';
+    for(i=0;i<2;i++){
+      var y0=H*(0.05+i*0.085);
+      ctx.beginPath();
+      for(var x=0;x<=W;x+=26){
+        var yy=y0+Math.sin(x*0.0075+t*(0.15+i*0.05)+i*2.1)*(16+i*9);
+        if(x===0)ctx.moveTo(x,yy);else ctx.lineTo(x,yy);
+      }
+      ctx.strokeStyle='rgba(150,225,235,'+((0.020+i*0.008)*(CFG.mood==='bright'?2.2:1))+')';
+      ctx.lineWidth=26+i*14;ctx.stroke();
+      ctx.strokeStyle='rgba(180,240,245,'+((0.016+i*0.006)*(CFG.mood==='bright'?2.2:1))+')';
+      ctx.lineWidth=7+i*4;ctx.stroke();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  /* 3) 远景光团：仅深色主题 */
+  if(shadows.length&&CFG.mood!=='bright'){
+    ctx.globalCompositeOperation='lighter';
+    for(i=0;i<shadows.length;i++){
+      var sh=shadows[i];
+      var aB=0.032+0.014*Math.sin(t*0.5+sh.ph);
+      var tg=ctx.createRadialGradient(sh.x,sh.y,0,sh.x,sh.y,sh.s*0.55);
+      tg.addColorStop(0,CFG.brand==='ocean'?'rgba(122,240,200,'+aB+')':'rgba(150,205,240,'+aB+')');
+      tg.addColorStop(1,'rgba(120,180,220,0)');
+      ctx.fillStyle=tg;
+      ctx.beginPath();ctx.arc(sh.x,sh.y,sh.s*0.55,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  /* 4) 海床剪影（B 方案）：起伏暗脊（带边缘微光）+ 随洋流摆动的海草丛 */
+  if(CFG.sea==='B'&&CFG.mood!=='bright'){
+    var surf=H*0.955;
+    ctx.beginPath();
+    ctx.moveTo(0,H);
+    for(var sx=0;sx<=W;sx+=34){
+      ctx.lineTo(sx,surf-46-24*Math.sin(sx*0.0042+1.9)-12*Math.sin(sx*0.012+0.4));
+    }
+    ctx.lineTo(W,H);ctx.closePath();
+    ctx.fillStyle='rgba(2,7,12,0.94)';
+    ctx.fill();
+    /* 海床边缘微光：把暗脊与水体分开 */
+    ctx.beginPath();
+    for(var ex=0;ex<=W;ex+=34){
+      var ey2=surf-46-24*Math.sin(ex*0.0042+1.9)-12*Math.sin(ex*0.012+0.4);
+      if(ex===0)ctx.moveTo(ex,ey2);else ctx.lineTo(ex,ey2);
+    }
+    ctx.strokeStyle='rgba(52,120,120,0.22)';ctx.lineWidth=1.2;ctx.stroke();
+    /* 海草：每株 3~5 片叶，向外舒展、随流摆动，淡荧光边 */
+    for(i=0;i<kelps.length;i++){
+      var kp=kelps[i];
+      var bx=kp.x,by=surf-40-18*Math.sin(bx*0.0042+1.9);
+      var swayA=Math.sin(t*0.5+kp.ph)*0.16*(0.5+surge(t));
+      var glowA=0.18+0.12*surge(t);
+      for(var b2=0;b2<kp.blades.length;b2++){
+        var bl2=kp.blades[b2];
+        var hl=kp.h*bl2.hl,wd=bl2.w;
+        var sw=swayA*(0.6+0.4*bl2.hl)+(kp.lean+bl2.o)*0.12;
+        var x1=bx+sw*hl*0.35+bl2.o*14;
+        var x2=bx+sw*hl*0.75+bl2.o*30;
+        var x3=bx+sw*hl*1.05+bl2.o*44;
+        var y1=by-hl*0.45,y2=by-hl*0.78,y3=by-hl;
+        /* 主体：半透明海藻绿叶片（越到叶尖越细，靠两层描边模拟渐细） */
+        ctx.beginPath();
+        ctx.moveTo(bx+bl2.o*5,by);
+        ctx.bezierCurveTo(x1,y1,x2,y2,x3,y3);
+        ctx.strokeStyle='rgba(26,76,74,0.88)';
+        ctx.lineWidth=wd;ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(bx+bl2.o*5,y1*0+by-1);
+        ctx.bezierCurveTo(x1,y1,x2,y2,x3,y3);
+        ctx.strokeStyle='rgba(18,58,58,0.75)';
+        ctx.lineWidth=Math.max(1.2,wd*0.45);ctx.stroke();
+        /* 淡荧光边（随涌流呼吸） */
+        ctx.beginPath();
+        ctx.moveTo(bx+bl2.o*5+1,by-1);
+        ctx.bezierCurveTo(x1+1,y1,x2+1,y2,x3+1,y3);
+        ctx.strokeStyle='rgba(88,190,170,'+glowA+')';
+        ctx.lineWidth=Math.max(0.9,wd*0.3);ctx.stroke();
+      }
+    }
+  }
+
+  ctx=prev;
+}
+
+/* ---------- 前景层（每帧：礁鱼/水草/海葵/气泡/微粒/焦散） ---------- */
+function draw(t){
+  var i=0;
+  var __b0=performance.now();
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage((CFG.mood==='bright'&&bgS)?bgS:bgc,0,0,W,H);
+  var __b1=performance.now();
+
+  if(CFG.mood==='bright'){
+    var __t1=performance.now();
+    /* 1) 小鱼群 + 礁鱼（中景，在水草之后） */
+    for(i=0;i<shoals.length;i++)drawShoal(shoals[i],t);
+    for(i=0;i<fish.length;i++)drawFish(fish[i],t);
+    var __t2=performance.now();
+    /* 2) 水草（前景，采样洋流鞭状摆动） */
+    for(i=0;i<grass.length;i++)drawGrass(grass[i],t);
+    var __t3=performance.now();
+    /* 3) 海葵 + 共生小丑鱼 */
+    for(i=0;i<anemones.length;i++)drawAnemone(anemones[i],t);
+    var __t4=performance.now();
+    window.__perf2={blit:Math.round(__b1-__b0),fish:Math.round(__t2-__t1),grass:Math.round(__t3-__t2),ane:Math.round(__t4-__t3)};
+  }
+
+  /* 4) 微粒：随洋流漂移（星尘 / 生物荧光两种质感） */
+  ctx.globalCompositeOperation='lighter';
+  var isStar=CFG.brand!=='ocean';
+  for(i=0;i<parts.length;i++){
+    var p=parts[i];
+    var twk=Math.abs(Math.sin(p.tw));
+    var a,rad,px,py;
+    px=p.x+mx*10*p.z;py=p.y+my*7*p.z;
+    if(CFG.mood==='bright'){
+      a=(0.18+0.30*twk)*p.z;
+      rad=p.r*1.15;
+      ctx.fillStyle='rgba(255,255,255,'+a+')';
+    }else if(isStar){
+      a=(0.14+0.50*twk)*p.z;
+      rad=p.kind==='star'?p.r+0.5:p.r;
+      ctx.fillStyle='rgba(205,220,244,'+a+')';
+    }else{
+      a=(0.10+0.34*twk)*p.z;
+      rad=p.kind==='glow'?p.r*1.5:p.r;
+      ctx.fillStyle=p.kind==='glow'?'rgba(122,255,214,'+a+')':'rgba(140,235,255,'+(a*0.85)+')';
+    }
+    ctx.beginPath();ctx.arc(px,py,rad,0,Math.PI*2);ctx.fill();
+    if(!isStar&&p.kind==='glow'&&CFG.mood!=='bright'){
+      ctx.beginPath();ctx.arc(px,py,rad*2.8,0,Math.PI*2);
+      ctx.fillStyle='rgba(110,240,200,'+(a*0.16)+')';ctx.fill();
+    }
+  }
+  ctx.globalCompositeOperation='source-over';
+
+  /* 5) 气泡（bright）：上浮摆动，柔光描边 + 底部暗弧衬出体积 */
+  if(CFG.mood==='bright'){
+    for(i=0;i<bubbles.length;i++){
+      var bo=bubbles[i];
+      var ba=bo.a*(bo.fade!==undefined?bo.fade:1);
+      if(ba<=0)continue;
+      ctx.beginPath();ctx.arc(bo.x,bo.y,bo.r,0,Math.PI*2);
+      ctx.strokeStyle='rgba(214,246,250,'+(0.78*ba)+')';ctx.lineWidth=1.1;ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,'+(0.22*ba)+')';ctx.fill();
+      ctx.beginPath();ctx.arc(bo.x,bo.y,bo.r*0.92,0.45,2.7);
+      ctx.strokeStyle='rgba(50,120,132,'+(0.34*ba)+')';ctx.lineWidth=Math.max(0.9,bo.r*0.22);ctx.stroke();
+      ctx.beginPath();ctx.arc(bo.x-bo.r*0.34,bo.y-bo.r*0.38,Math.max(0.8,bo.r*0.30),0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,'+(0.95*ba)+')';ctx.fill();
+    }
+  }
+
+  /* 6) 丁达尔光束（纹理贴图）+ 沙面焦散（横向滚动） */
+  if(CFG.mood==='bright'&&rayTex){
+    ctx.globalCompositeOperation='lighter';
+    var gsurge=0.85+0.5*surge(t);
+    var rstep=lowFx?2:1;
+    for(i=0;i<rays.length;i+=rstep){
+      var ray=rays[i];
+      var xb=ray.x+Math.sin(t*0.02+ray.ph)*50+mx*12;
+      var wd=ray.w*(1+0.14*Math.sin(t*0.05+ray.ph));
+      ctx.save();
+      ctx.translate(xb,-H*0.04);
+      ctx.rotate(ray.tilt+Math.sin(t*0.045+ray.ph)*0.02);
+      ctx.globalAlpha=Math.min(0.75,(0.045+ray.a*1.3)*gsurge);
+      ctx.drawImage(rayTex,0,0,wd,H*0.94);
+      ctx.restore();
+    }
+    ctx.globalAlpha=1;
+    if(!lowFx&&causticTex){
+      for(var ci=0;ci<3;ci++){
+        var off=(t*(26+ci*9))%512;
+        ctx.globalAlpha=0.10+ci*0.02;
+        for(var bx=-off;bx<W;bx+=512){
+          ctx.drawImage(causticTex,bx,H*(0.862+ci*0.046),512,44);
+        }
+      }
+      ctx.globalAlpha=1;
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+}
+
+/* ---------- 主循环（30fps 上限 + 自适应降级） ---------- */
+function loop(ts){
+  rafId=requestAnimationFrame(loop);
+  if(!lastDrawT){lastDrawT=ts;return;}
+  var raw=(ts-lastDrawT)/1000;
+  fpsAcc+=raw;fpsN++;
+  if(fpsAcc>=2){
+    var avg=fpsN/fpsAcc;
+    if(avg<45)lowFx=true;else if(avg>55)lowFx=false;
+    fpsAcc=0;fpsN=0;
+  }
+  if(ts-lastDrawT<33)return;
+  var dt=(ts-lastDrawT)/1000;lastDrawT=ts;
+  if(dt>0.2)dt=0.2;
+  var t=(ts-t0)/1000;
+  if(MOTION!==1){dt*=MOTION;t*=MOTION;}   /* 减少动态：全场景半速缓动 */
+  step(dt,t);
+  var pt0=performance.now();
+  if(!lastBgT||ts-lastBgT>200){renderBg(t);lastBgT=ts;window.__perf=window.__perf||{};window.__perf.bg=Math.round((window.__perf.bg||0)*0.8+(performance.now()-pt0)*0.2);pt0=performance.now();}
+  draw(t);
+  window.__perf=window.__perf||{};window.__perf.draw=Math.round((window.__perf.draw||0)*0.8+(performance.now()-pt0)*0.2);
+}
+window.addEventListener('mousemove',function(e){
+  mx=e.clientX/W-0.5;my=e.clientY/H-0.5;mouseT=performance.now();
+},{passive:true});
+window.addEventListener('touchmove',function(e){
+  var tch=e.touches&&e.touches[0];
+  if(tch){mx=tch.clientX/W-0.5;my=tch.clientY/H-0.5;mouseT=performance.now();}
+},{passive:true});
+window.addEventListener('touchend',function(){mouseT=-1e4;},{passive:true});
+var rzT=0;
+window.addEventListener('resize',function(){
+  if(rzT)clearTimeout(rzT);
+  rzT=setTimeout(function(){fit();if(reduce)draw(0);},200);
+});
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){if(rafId)cancelAnimationFrame(rafId);rafId=0;}
+  else if(!rafId){lastDrawT=0;lastBgT=0;fpsAcc=0;fpsN=0;rafId=requestAnimationFrame(loop);}
+});
+
+
+fit();
+renderBg(0);
+rafId=requestAnimationFrame(loop);
+})();
 
 /* ================= 启动 ================= */
 /* loadLinks：唯一驱动器——服务端按会话返回对应页面（访客/管理员→原始首页；普通用户→个人页）
@@ -1410,46 +2691,161 @@ var pointer={x:0,y:0,active:false};
 var touchTimer=0;
 var KEY='starport.fx';
 var mqReduce=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
-var HUES=[181,204,224,236,252]; // 青 -> 蓝 -> 蓝紫（与站点同色系）
+/* ---------- 物种表（参考自然界公认最美的水母） ----------
+   moon      海月水母 Aurelia aurita：乳白伞 + 四叶马蹄形性腺 + 宽口腕 + 缘须
+   nettle    太平洋海荨麻 Chrysaora：金橙辐纹 + 细长触须 + 褶皱飘带口腕
+   flowerhat 花帽水母 Olindias formosa：霓虹粉 + 粗亮辐纹 + 卷曲荧光触须
+   atolla    警报水母 Atolla wyvillei：绯红冠冕锯齿伞缘 + 超长尾须 + 报警蓝光
+   pelagia   夜光水母 Pelagia noctiluca：紫红疣突 + 通体生物荧光
+   lion      狮鬃水母 Cyanea capillata：琥珀色鬃毛触须帘
+   crystal   水晶水母 Aequorea victoria：近透明伞 + 辐管 + 绿色荧光缘点
+   scal:[波数,波幅]  dome:穹顶高  wMul:伞宽系数  opa:伞体不透明度
+   mv:运动档案 —— freq:搏动频率(次/秒)  amp:推力系数  decay:滑行衰减(小=急停)  turn:转向灵敏度
+       maxSp:峰值游速  post:直立度(1=伞顶恒朝上、触须下垂)  couple:洋流耦合系数(1=完全随流)  bellAmp:收缩幅度  cFrac:收缩占比(小=快收慢舒) */
+var SPECIES=[
+ {id:'moon',glow:[122,204,255],dome:0.62,wMul:1.00,opa:1.00,scal:[2.2,1.0],gonads:4,stripes:0,warts:0,canals:0,rimDots:0,alarm:0,tail:0,
+  tents:{n:20,len:[0.18,0.34],spread:0.75,tip:0,thin:1.0},arms:{n:4,len:1.0,wide:1.0},wN:1.5,wS:1.5,
+  mv:{freq:0.32,amp:1.60,decay:0.30,turn:1.5,maxSp:80,chase:2.2,post:0.35,couple:0.45,bellAmp:0.15,cFrac:0.42}},
+ {id:'nettle',glow:[255,186,84],dome:0.58,wMul:1.02,opa:1.00,scal:[3.0,0.8],gonads:0,stripes:18,warts:0,canals:0,rimDots:0,alarm:0,tail:0,
+  tents:{n:18,len:[0.62,1.05],spread:0.50,tip:0,thin:0.8},arms:{n:4,len:1.9,wide:0.5},wN:1.2,wS:1.2,
+  mv:{freq:0.60,amp:1.50,decay:0.28,turn:2.0,maxSp:110,chase:1.4,post:0.45,couple:0.35,bellAmp:0.17,cFrac:0.36}},
+ {id:'flowerhat',glow:[255,96,196],dome:0.70,wMul:0.96,opa:1.05,scal:[8,1.9],gonads:0,stripes:24,warts:0,canals:0,rimDots:24,alarm:0,tail:0,
+  tents:{n:26,len:[0.55,0.95],spread:0.85,tip:1,thin:0.9},arms:{n:0,len:0,wide:0},wN:1.2,wS:1.1,
+  mv:{freq:1.10,amp:2.00,decay:0.08,turn:3.0,maxSp:150,chase:1.2,post:0.15,couple:0.15,bellAmp:0.11,cFrac:0.30}},
+ {id:'atolla',glow:[255,70,120],dome:0.76,wMul:0.90,opa:1.00,scal:[6,2.8],gonads:0,stripes:0,warts:0,canals:0,rimDots:16,alarm:1,tail:1,
+  tents:{n:16,len:[0.30,0.52],spread:0.6,tip:1,thin:0.9},arms:{n:0,len:0,wide:0},wN:0.8,wS:0.8,
+  mv:{freq:0.22,amp:0.70,decay:0.55,turn:0.45,maxSp:26,chase:2.2,post:0.95,couple:1.0,bellAmp:0.10,cFrac:0.50}},
+ {id:'pelagia',glow:[214,116,255],dome:0.64,wMul:1.00,opa:1.00,scal:[3,0.9],gonads:0,stripes:0,warts:16,canals:0,rimDots:0,alarm:0,tail:0,
+  tents:{n:8,len:[0.85,1.30],spread:0.35,tip:1,thin:0.8},arms:{n:0,len:0,wide:0},wN:0.9,wS:0.9,
+  mv:{freq:0.75,amp:1.20,decay:0.18,turn:2.4,maxSp:100,chase:1.4,post:0.50,couple:0.40,bellAmp:0.15,cFrac:0.33}},
+ {id:'lion',glow:[255,124,72],dome:0.50,wMul:1.15,opa:0.90,scal:[2,0.6],gonads:0,stripes:12,warts:0,canals:0,rimDots:0,alarm:0,tail:0,
+  tents:{n:36,len:[0.70,1.30],spread:0.22,tip:0,thin:0.55},arms:{n:0,len:0,wide:0},wN:0.8,wS:0.7,
+  mv:{freq:0.28,amp:2.00,decay:0.50,turn:0.60,maxSp:42,chase:2.0,post:0.85,couple:0.85,bellAmp:0.20,cFrac:0.45}},
+ {id:'crystal',glow:[98,255,190],dome:0.66,wMul:1.02,opa:0.55,scal:[2,0.5],gonads:0,stripes:0,warts:0,canals:16,rimDots:22,alarm:0,tail:0,
+  tents:{n:14,len:[0.35,0.60],spread:0.5,tip:1,thin:0.8},arms:{n:0,len:0,wide:0},wN:0.8,wS:0.8,
+  mv:{freq:1.30,amp:1.00,decay:0.10,turn:2.8,maxSp:120,chase:1.2,post:0.20,couple:0.25,bellAmp:0.10,cFrac:0.30}}
+];
 
 function isSmall(){return Math.min(window.innerWidth,window.innerHeight)<640;}
 function rand(a,b){return a+Math.random()*(b-a);}
 function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 function normAng(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
 
-/* ---------- 单只水母 ---------- */
-function Jelly(){
+/* ---------- 交互状态：点击闪烁 / 长按选中拖拽 ---------- */
+var press={j:null,t0:0,sel:false,mx:0,my:0};
+var selected=null;
+/* 命中检测：伞体椭圆 + 触须拖尾区（从最上层往下找） */
+function hitJelly(px,py){
+  for(var i=flock.length-1;i>=0;i--){
+    var j=flock[i];
+    var th=j.dh+Math.PI/2;
+    var dx=px-j.x,dy=py-j.y;
+    var lx=dx*Math.cos(th)+dy*Math.sin(th);
+    var ly=-dx*Math.sin(th)+dy*Math.cos(th);
+    var vs=j.vs,wq=vs*0.5*j.sp.wMul,hh=vs*0.85;
+    var ex=lx/(wq*1.25),ey=(ly+hh*0.18)/(hh*1.15);
+    if(ex*ex+ey*ey<=1)return j;               /* 伞体 */
+    if(ly>-hh*0.1&&ly<vs*1.15&&Math.abs(lx)<vs*0.55)return j; /* 拖尾 */
+  }
+  return null;
+}
+/* 放下选中水母：原地继续漫游 */
+function dropSel(){
+  if(!selected)return;
+  var j=selected;
+  j.wx=clamp(j.x,j.vs,W-j.vs);
+  j.wy=clamp(j.y,j.vs,H-j.vs);
+  j.wanderT=rand(3,7);
+  j.speed=0;
+  selected=null;press.sel=false;
+  document.body.style.cursor='';
+}
+
+/* ---------- 单只水母：物种 + 深度 + 个体随机差异（形状/色彩/尺寸各不相同） ---------- */
+function Jelly(size){
   var small=isSmall();
-  this.size=rand(small?28:36,small?44:64);
+  this.size=size;
+  /* 物种加权随机 */
+  var pool=[],sum=0;
+  for(var wi=0;wi<SPECIES.length;wi++){var wgt=small?SPECIES[wi].wS:SPECIES[wi].wN;pool.push(wgt);sum+=wgt;}
+  var pick=Math.random()*sum,sp=SPECIES[SPECIES.length-1];
+  for(var si=0;si<pool.length;si++){pick-=pool[si];if(pick<=0){sp=SPECIES[si];break;}}
+  this.sp=sp;
+  /* 深度（3D 纵深）：近大远小、越近越亮 */
+  this.dz=rand(0.30,1.0);
+  this.vs=this.size*(0.55+0.45*this.dz);
+  /* 个体荧光色相微调：同物种每只颜色亦有差异 */
+  this.G=[clamp(Math.round(sp.glow[0]*rand(0.86,1.14)),40,255),
+          clamp(Math.round(sp.glow[1]*rand(0.86,1.14)),40,255),
+          clamp(Math.round(sp.glow[2]*rand(0.86,1.14)),40,255)];
+  /* 五彩斑斓：每只水母自带色相带（伞体渐变跨越 HS 度）与缓慢虹彩漂移 */
+  this.hue=rand(0,360);
+  this.hueSpread=rand(130,195);
+  this.hueSpeed=rand(8,16)*(Math.random()<0.5?1:-1);
+  this.sat=rand(66,92);
+  this.bio=rand(0,Math.PI*2);               /* 生物荧光脉冲相位 */
+  this.flash=0;this.flashT=rand(3,10);      /* 警报水母报警蓝光 */
+  this.cFlash=0;                             /* 点击荧光闪烁（0~1 衰减） */
   this.x=rand(this.size*2,Math.max(this.size*3,W-this.size*2));
   this.y=rand(this.size*2,Math.max(this.size*3,H-this.size*2));
   this.heading=rand(0,Math.PI*2);
   this.speed=0;
   this.phase=rand(0,1);
   this.bell=1;
-  this.hue=HUES[(Math.random()*HUES.length)|0];
-  this.alpha=rand(0.30,0.52);
-  this.wx=this.x;this.wy=this.y;
+  this.alpha=rand(0.50,0.72);
+  /* 初始漫游目标：沿当前朝向较远处（避免开局原地打转） */
+  this.wx=clamp(this.x+Math.cos(this.heading)*rand(150,400),this.size,W-this.size);
+  this.wy=clamp(this.y+Math.sin(this.heading)*rand(150,400),this.size,H-this.size);
   this.wanderT=rand(0,6);
   this.ringA=rand(0,Math.PI*2);
+  /* 初始姿态（物种直立度混合） */
+  this.dh=normAng(this.heading+normAng(-Math.PI/2-this.heading)*sp.mv.post);
+  /* 伞缘触须：数量/长度按物种 ± 个体随机 */
+  var T=sp.tents;
+  var nT=Math.max(6,Math.round(T.n*(small?0.75:1)*rand(0.82,1.22)));
   this.tents=[];
-  var nT=small?4:5;
-  for(var i=0;i<nT;i++){
-    var pts=[];
-    for(var j=0;j<7;j++)pts.push({x:this.x,y:this.y});
-    this.tents.push({pts:pts,ph:rand(0,Math.PI*2)});
+  for(var k=0;k<nT;k++){
+    this.tents.push({
+      u:((k+0.5)/nT)*2-1,
+      ph:rand(0,Math.PI*2),
+      len:rand(T.len[0],T.len[1]),
+      pts:[{x:this.x,y:this.y},{x:this.x,y:this.y},{x:this.x,y:this.y}]
+    });
+  }
+  /* 口腕（飘带）：数量 ± 随机 */
+  this.arms=[];
+  var nA=Math.round(sp.arms.n*rand(0.85,1.15));
+  for(var i=0;i<nA;i++){
+    var ap=[];
+    for(var j=0;j<8;j++)ap.push({x:this.x,y:this.y});
+    this.arms.push({pts:ap,ph:rand(0,Math.PI*2),off:(i-(nA-1)/2)*0.36,dir:(i-(nA-1)/2)*0.30,lenMul:rand(0.75,1.0)});
+  }
+  /* 疣突（夜光水母）：构造期固定随机点，避免逐帧抖动 */
+  this.warts=[];
+  if(sp.warts){
+    for(var w2=0;w2<sp.warts;w2++){
+      this.warts.push({a:rand(-Math.PI,Math.PI),r:rand(0.30,0.88),s:rand(0.5,1.1)});
+    }
+  }
+  /* 超长尾须（警报水母） */
+  if(sp.tail){
+    var tpts=[];
+    for(var t2=0;t2<16;t2++)tpts.push({x:this.x,y:this.y});
+    this.tail={pts:tpts,ph:rand(0,Math.PI*2)};
   }
 }
 Jelly.prototype.update=function(dt,time){
-  var small=isSmall(),ring=small?70:90;
-  /* 收缩脉冲节律：phase 0->1 收缩（喷流），顶点施加冲量，随后舒张滑行 */
-  this.phase+=dt*(small?0.7:0.8);
+  var small=isSmall(),SP=this.sp.mv,ring=(small?90:120)+this.size*0.45;
+  /* ---- 物种搏动节律：快收慢舒（真实水母搏动波形），频率随物种 ---- */
+  this.phase+=dt*SP.freq*(small?0.85:1);
   var impulse=false;
   if(this.phase>=1){this.phase-=1;impulse=true;}
-  var squeeze=Math.sin(this.phase*Math.PI);
-  this.bell=1-0.14*squeeze;
+  var ph0=this.phase,sq;
+  if(ph0<SP.cFrac)sq=Math.sin((ph0/SP.cFrac)*Math.PI*0.5);
+  else sq=Math.cos(((ph0-SP.cFrac)/(1-SP.cFrac))*Math.PI*0.5);
+  this.bell=1-SP.bellAmp*sq;
 
-  /* 期望朝向 */
+  /* ---- 期望朝向：跟随鼠标 / 沿当前朝向延续的柔和漫游 ---- */
   var want;
   if(pointer.active){
     var dx=pointer.x-this.x,dy=pointer.y-this.y;
@@ -1465,116 +2861,463 @@ Jelly.prototype.update=function(dt,time){
   }else{
     this.wanderT-=dt;
     if(this.wanderT<=0){
-      this.wanderT=rand(2.5,6);
-      this.wx=rand(this.size,W-this.size);
-      this.wy=rand(this.size,H-this.size);
+      /* 沿当前朝向继续游 + 小幅偏转（不再随机跳点 → 消除"无头苍蝇"感） */
+      this.wanderT=rand(5,12);
+      var wa=this.heading+rand(-1.0,1.0);
+      var wd=rand(150,Math.min(W,H)*0.55);
+      this.wx=clamp(this.x+Math.cos(wa)*wd,this.vs,W-this.vs);
+      this.wy=clamp(this.y+Math.sin(wa)*wd,this.vs,H-this.vs);
     }
     want=Math.atan2(this.wy-this.y,this.wx-this.x);
   }
-  /* 有限角速度转向（有惯性，不会瞬间掉头） */
-  var turn=(small?1.9:2.4)*dt;
+  /* 有限角速度转向（物种差异：花帽灵动、警报/狮鬃极迟缓） */
+  var turn=SP.turn*dt;
   var diff=normAng(want-this.heading);
   this.heading=normAng(this.heading+clamp(diff,-turn,turn));
 
-  /* 冲量：仅收缩顶点施加，远则强近则弱 */
+  /* ---- 冲量：搏动收缩起始施加；推力与峰值速度按物种限制 ---- */
   if(impulse){
-    var sp;
+    var sp2;
     if(pointer.active){
       var d2=Math.sqrt((pointer.x-this.x)*(pointer.x-this.x)+(pointer.y-this.y)*(pointer.y-this.y));
-      sp=d2>ring?clamp(40+d2*0.5,40,190):rand(10,26);
+      sp2=d2>ring?clamp(40+d2*0.5,40,190):rand(10,26);
     }else{
-      sp=rand(30,50);
+      sp2=rand(30,50);
     }
-    this.speed+=sp*(0.55+0.45*Math.random());
+    sp2*=SP.amp*rand(0.85,1.15);
+    /* 漫游限速保持物种习性的慢速；追鼠标时按 chase 系数放宽峰值，保证聚拢及时 */
+    var cap=pointer.active?SP.maxSp*(SP.chase||1.5):SP.maxSp;
+    this.speed=Math.min(this.speed+sp2,cap);
   }
-  /* 滑行衰减（脉冲式前进） */
-  this.speed*=Math.pow(0.06,dt);
-  this.x+=Math.cos(this.heading)*this.speed*dt;
-  this.y+=Math.sin(this.heading)*this.speed*dt;
+  /* 滑行衰减（物种差异：花帽急停、狮鬃长滑）+ 深度视差 */
+  this.speed*=Math.pow(SP.decay,dt);
+  var par=0.6+0.4*this.dz;
+  this.x+=Math.cos(this.heading)*this.speed*dt*par;
+  this.y+=Math.sin(this.heading)*this.speed*dt*par;
 
-  /* 视口软边界：碰壁转向 */
-  var m=this.size*1.4;
-  if(this.x<m){this.x=m;this.heading=normAng(this.heading+0.7);}
-  else if(this.x>W-m){this.x=W-m;this.heading=normAng(this.heading-0.7);}
-  if(this.y<m){this.y=m;this.heading=normAng(this.heading+0.7);}
-  else if(this.y>H-m){this.y=H-m;this.heading=normAng(this.heading-0.7);}
+  /* ---- 环境洋流：采样全局流场（微粒/光柱/水母共用同一场，含 45s 涌流） ----
+     无海洋模块时回退为内置慢漂移，保证模块可独立摘除 */
+  var cf=(window.__sea&&window.__sea.current)?window.__sea.current(this.x,this.y,time)
+        :{u:Math.sin(time*0.21+this.x*0.0019)*14,v:Math.cos(time*0.17+this.y*0.0015)*9};
+  this.cur=cf;
+  var cpl=SP.couple||0;
+  if(cpl>0){
+    this.x+=cf.u*cpl*dt*par;
+    this.y+=cf.v*cpl*dt*par;
+  }
 
-  /* 触手：锚点跟随伞体底缘，反航向拖曳 + 正弦摆动 */
-  var backA=this.heading+Math.PI;
-  var bx=this.x+Math.cos(backA)*(this.size*0.45*this.bell);
-  var by=this.y+Math.sin(backA)*(this.size*0.45*this.bell);
-  var seg=this.size*0.42;
+  /* ---- 视口边界：平滑转向回中心（不再碰壁弹跳） ---- */
+  var m=this.vs*1.4;
+  if(this.x<m||this.x>W-m||this.y<m||this.y>H-m){
+    var ca=Math.atan2(H*0.5-this.y,W*0.5-this.x);
+    this.heading=normAng(this.heading+clamp(normAng(ca-this.heading),-turn*1.6,turn*1.6));
+    this.x=clamp(this.x,m,W-m);this.y=clamp(this.y,m,H-m);
+  }
+
+  /* ---- 姿态：物种直立度（漂流型伞顶恒朝上、触须自然下垂） ---- */
+  this.dh=normAng(this.heading+normAng(-Math.PI/2-this.heading)*SP.post);
+  /* ---- 漂流型随洋流侧倾：伞体沿流向偏 ≤12°（真实水母的随流倾斜） ---- */
+  if((SP.couple||0)>0.5&&this.cur){
+    var curAng=Math.atan2(this.cur.v,this.cur.u);
+    this.dh=normAng(this.dh+clamp(normAng(curAng-this.dh)*0.25,-0.21,0.21));
+  }
+
+  /* 生物荧光脉冲 + 警报蓝光计时（Atolla） */
+  this.bio+=dt*1.6;
+  if(this.cFlash>0)this.cFlash=Math.max(0,this.cFlash-dt*2.2);
+  if(this.sp.alarm){
+    this.flashT-=dt;
+    if(this.flashT<=0){this.flashT=rand(6,14);this.flash=1;}
+  }
+  if(this.flash>0)this.flash=Math.max(0,this.flash-dt*1.6);
+
+  /* 伞缘触须：沿伞缘弧分布，扇形散开下垂 + 相位延迟摆动 */
+  var backA=this.dh+Math.PI;
+  /* 局部坐标：旋转 th 后局部 -y 指向朝向（伞顶朝前），+y 指向拖尾（伞缘） */
+  var th=this.dh+Math.PI/2;
+  var cosT=Math.cos(th),sinT=Math.sin(th);
+  var vs=this.vs;
+  var wq=vs*(0.92+0.08*this.bell)*0.5*this.sp.wMul;
+  var hhU=vs*0.85*this.bell;
   for(var ti=0;ti<this.tents.length;ti++){
-    var tent=this.tents[ti],pts=tent.pts;
-    var spread=(ti-(this.tents.length-1)/2)*this.size*0.26;
-    pts[0].x=bx+Math.cos(this.heading+Math.PI/2)*spread;
-    pts[0].y=by+Math.sin(this.heading+Math.PI/2)*spread;
-    for(var k=1;k<pts.length;k++){
-      var pr=pts[k-1],p=pts[k];
-      var wob=Math.sin(time*2.0+tent.ph+k*0.85)*(1.5+k*0.7)*(this.speed>20?1.3:0.8);
-      var tx=pr.x+Math.cos(backA)*seg+Math.cos(this.heading)*wob*0.35;
-      var ty=pr.y+Math.sin(backA)*seg+Math.sin(this.heading)*wob*0.35;
-      var f=Math.min(1,12*dt);
-      p.x+=(tx-p.x)*f;p.y+=(ty-p.y)*f;
+    var tn=this.tents[ti],tp=tn.pts;
+    var u=tn.u;
+    /* 锚点落在伞缘下凸弧上（局部 (u*wq, arcU) 转全局） */
+    var arcU=hhU*(0.02+0.23*Math.cos(u*Math.PI/2));
+    var ax=this.x+u*wq*cosT-arcU*sinT;
+    var ay=this.y+u*wq*sinT+arcU*cosT;
+    tp[0].x=ax;tp[0].y=ay;
+    var L=vs*tn.len;
+    var wob=Math.sin(time*2.4+tn.ph+u*2.0)*(0.8+Math.min(1,this.speed*0.012)*2.0)*(vs/64);
+    var ang=backA+u*this.sp.tents.spread; /* 扇形散开：两侧触须向外撇 */
+    var ex=ax+Math.cos(ang)*L+cosT*wob;
+    var ey=ay+Math.sin(ang)*L+sinT*wob;
+    var f=Math.min(1,14*dt);
+    tp[2].x+=(ex-tp[2].x)*f;tp[2].y+=(ey-tp[2].y)*f;
+    /* 中间节点侧向弯曲（避免直线感） */
+    var mx=(ax+tp[2].x)/2+cosT*wob*0.8,my=(ay+tp[2].y)/2+sinT*wob*0.8;
+    tp[1].x+=(mx-tp[1].x)*f;tp[1].y+=(my-tp[1].y)*f;
+  }
+  /* 宽口腕：从伞底中央裙摆状散开垂下，拖曳 + 波浪（双向柔化约束） */
+  var armSeg=vs*0.15*this.sp.arms.len;
+  for(var ai=0;ai<this.arms.length;ai++){
+    var arm=this.arms[ai],ap=arm.pts;
+    var aDir=backA+arm.dir;
+    var cosA=Math.cos(aDir)*0.65,sinA=Math.sin(aDir)*0.65+0.35; /* 混合重力：口腕自然下垂 */
+    var aLen=Math.sqrt(cosA*cosA+sinA*sinA)||1;
+    cosA/=aLen;sinA/=aLen;
+    /* 根部锚在伞缘内侧：局部 (arm.off*vs, 0.07vs) */
+    var rootY=vs*0.07;
+    ap[0].x=this.x+arm.off*vs*cosT-rootY*sinT;
+    ap[0].y=this.y+arm.off*vs*sinT+rootY*cosT;
+    for(var k2=1;k2<ap.length;k2++){
+      var pr=ap[k2-1],p=ap[k2];
+      var wob2=Math.sin(time*1.85+arm.ph+k2*0.75)*arm.lenMul*(1.2+k2*0.55)*(vs/64)*(0.6+Math.min(1,this.speed*0.015));
+      var bend=Math.sin(time*1.15+arm.ph+k2*0.8)*0.28; /* S 形弯曲 */
+      var bx3=cosA*Math.cos(bend)-sinA*Math.sin(bend);
+      var by3=sinA*Math.cos(bend)+cosA*Math.sin(bend);
+      var tx=pr.x+bx3*armSeg+wob2*0.30*cosT;
+      var ty=pr.y+by3*armSeg+wob2*0.30*sinT;
+      var ff=Math.min(1,10*dt);
+      p.x+=(tx-p.x)*ff;p.y+=(ty-p.y)*ff;
       var ddx=p.x-pr.x,ddy=p.y-pr.y,dl=Math.sqrt(ddx*ddx+ddy*ddy)||1;
-      if(dl>seg){var ff=(dl-seg)/dl*0.85;p.x-=ddx*ff;p.y-=ddy*ff;}
+      if(dl>armSeg){
+        var f2=(dl-armSeg)/dl;
+        p.x-=ddx*f2*0.7;p.y-=ddy*f2*0.7;
+        pr.x+=ddx*f2*0.3;pr.y+=ddy*f2*0.3;
+      }
     }
+  }
+  /* 超长尾须（警报水母）：细长、大幅摆动 */
+  if(this.tail){
+    var tpt=this.tail.pts,segT=vs*0.16;
+    tpt[0].x=this.x+Math.cos(backA)*vs*0.10;
+    tpt[0].y=this.y+Math.sin(backA)*vs*0.10;
+    for(var k3=1;k3<tpt.length;k3++){
+      var pr3=tpt[k3-1],p3=tpt[k3];
+      var wob3=Math.sin(time*2.0+this.tail.ph+k3*0.40)*vs*0.085*(k3/tpt.length)*(1+Math.min(1,this.speed*0.02));
+      var ang3=backA+Math.sin(time*1.2+this.tail.ph+k3*0.16)*0.55;
+      var tx3=pr3.x+Math.cos(ang3)*segT+cosT*wob3*0.12;
+      var ty3=pr3.y+Math.sin(ang3)*segT+sinT*wob3*0.12;
+      var f3=Math.min(1,9*dt);
+      p3.x+=(tx3-p3.x)*f3;p3.y+=(ty3-p3.y)*f3;
+    }
+  }
+  /* 被选中拖拽：位置直跟指针（覆盖自主运动，搏动/荧光等行为照常） */
+  if(selected===this){
+    var gf=Math.min(1,10*dt);
+    this.x+=(pointer.x-this.x)*gf;
+    this.y+=(pointer.y-this.y)*gf;
+    this.x=clamp(this.x,this.vs*0.3,Math.max(this.vs*0.3,W-this.vs*0.3));
+    this.y=clamp(this.y,this.vs*0.3,Math.max(this.vs*0.3,H-this.vs*0.3));
+    this.speed=0;
+    this.wx=this.x;this.wy=this.y;
   }
 };
+/* 平滑多边形路径（带宽飘带：两条边界用二次曲线中点法连接，避免硬折角） */
+function ribbonPath(L,R){
+  var n=L.length;
+  ctx.beginPath();
+  ctx.moveTo(L[0].x,L[0].y);
+  for(var i=1;i<n-1;i++){
+    ctx.quadraticCurveTo(L[i].x,L[i].y,(L[i].x+L[i+1].x)/2,(L[i].y+L[i+1].y)/2);
+  }
+  ctx.lineTo(L[n-1].x,L[n-1].y);
+  for(var k=n-1;k>0;k--){
+    ctx.quadraticCurveTo(R[k].x,R[k].y,(R[k].x+R[k-1].x)/2,(R[k].y+R[k-1].y)/2);
+  }
+  ctx.lineTo(R[0].x,R[0].y);
+  ctx.closePath();
+}
 Jelly.prototype.draw=function(){
-  var size=this.size,hue=this.hue;
-  /* 触手（先画，位于伞体之下） */
-  ctx.lineCap='round';
-  for(var ti=0;ti<this.tents.length;ti++){
-    var pts=this.tents[ti].pts;
-    for(var k=1;k<pts.length;k++){
-      var fade=1-k/pts.length;
+  var sp=this.sp,G=this.G;
+  var size=this.vs;                          /* 深度缩放后的视觉尺寸 */
+  var alp=this.alpha*(0.55+0.45*this.dz)*sp.opa;
+  var th=this.dh+Math.PI/2;
+  var wq=size*(0.92+0.08*this.bell)*0.5*sp.wMul;
+  var bio=0.55+0.45*Math.sin(this.bio);      /* 荧光脉冲 0.1~1 */
+  if(selected===this)bio=Math.min(1.4,bio+0.55); /* 选中时荧光增强 */
+  var self=this;
+  /* 通透浅海主题下的颜料化渲染：浅背景下白色发光失效，改用物种色半透体+深色描边 */
+  var BRIGHT=document.body.className.indexOf('mood-bright')>=0;
+  /* 五彩斑斓配色：同一只水母各部位用不同色相（伞体渐变/口腕/触须/伞缘/纹饰），并随时间缓慢虹彩漂移 */
+  var H0=((this.hue+elapsed*this.hueSpeed)%360+360)%360;
+  var HS=this.hueSpread,SAT=this.sat;
+  function hcol(dh,a,l){var h=((H0+dh)%360+360)%360;return 'hsla('+h.toFixed(1)+','+SAT.toFixed(0)+'%,'+(l===undefined?64:l)+'%,'+a+')';}
+  function dk(a){return hcol(0,a,34);}
+  function rgb(a){return hcol(0,a);}
+
+  /* ---- 0) 外圈荧光晕（additive，随荧光脉冲呼吸） ---- */
+  ctx.globalCompositeOperation='lighter';
+  var hg=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,size*1.5);
+  hg.addColorStop(0,rgb(0.09+0.10*bio+0.35*this.cFlash));
+  hg.addColorStop(0.55,rgb(0.045));
+  hg.addColorStop(1,rgb(0));
+  ctx.fillStyle=hg;
+  ctx.beginPath();ctx.arc(this.x,this.y,size*1.5,0,Math.PI*2);ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+
+  /* ---- 1) 超长尾须（警报水母）：荧光长线 ---- */
+  if(this.tail){
+    var tp=this.tail.pts;
+    ctx.beginPath();ctx.moveTo(tp[0].x,tp[0].y);
+    for(var q0=1;q0<tp.length;q0++)ctx.lineTo(tp[q0].x,tp[q0].y);
+    ctx.strokeStyle=hcol(-HS*0.35,alp*0.34,68);
+    ctx.lineWidth=Math.max(1.2,size*0.020);ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,'+(alp*0.16)+')';
+    ctx.lineWidth=Math.max(0.6,size*0.008);ctx.stroke();
+  }
+
+  /* ---- 2) 口腕飘带（物种色 + 亮芯） ---- */
+  ctx.lineCap='round';ctx.lineJoin='round';
+  for(var ai=0;ai<this.arms.length;ai++){
+    var ap=this.arms[ai].pts;
+    var an=ap.length;
+    var w0=size*0.105*sp.arms.wide;
+    var oL=[],oR=[],iL=[],iR=[];
+    for(var bi=0;bi<an;bi++){
+      var bp=ap[bi],bpv=ap[bi-1]||bp,bnx=ap[bi+1]||bp;
+      var bdx=bnx.x-bpv.x,bdy=bnx.y-bpv.y;
+      var bdl=Math.sqrt(bdx*bdx+bdy*bdy)||1;
+      var bnx2=-bdy/bdl,bny2=bdx/bdl; /* 单位法线 */
+      var bt=bi/(an-1);
+      /* 宽度包络：中段最宽，末端幂函数收尖 */
+      var bw=w0*(0.85+0.30*Math.sin(Math.min(1,bt*2.0)*Math.PI*0.5))*Math.pow(1-bt,0.8);
+      oL.push({x:bp.x+bnx2*bw,y:bp.y+bny2*bw});
+      oR.push({x:bp.x-bnx2*bw,y:bp.y-bny2*bw});
+      iL.push({x:bp.x+bnx2*bw*0.52,y:bp.y+bny2*bw*0.52});
+      iR.push({x:bp.x-bnx2*bw*0.52,y:bp.y-bny2*bw*0.52});
+    }
+    ribbonPath(oL,oR);
+    ctx.fillStyle=hcol(HS*0.34,alp*0.26,66);ctx.fill();
+    ribbonPath(iL,iR);
+    ctx.fillStyle=BRIGHT?'rgba(255,255,255,'+(alp*0.45)+')':'rgba(238,250,255,'+(alp*0.22)+')';ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(ap[0].x,ap[0].y);
+    for(var mi=1;mi<an-1;mi++)ctx.quadraticCurveTo(ap[mi].x,ap[mi].y,(ap[mi].x+ap[mi+1].x)/2,(ap[mi].y+ap[mi+1].y)/2);
+    ctx.lineTo(ap[an-1].x,ap[an-1].y);
+    ctx.strokeStyle='rgba(255,255,255,'+(alp*0.16)+')';
+    ctx.lineWidth=Math.max(0.6,size*0.011);ctx.stroke();
+  }
+
+  /* ---- 3) 伞缘触须：荧光宽层 + 亮芯 + 尖端荧光点 ---- */
+  var tw=Math.max(0.7,size*0.014*sp.tents.thin);
+  if(this.tents.length){
+    ctx.beginPath();
+    for(var ti=0;ti<this.tents.length;ti++){
+      var tp2=this.tents[ti].pts;
+      ctx.moveTo(tp2[0].x,tp2[0].y);
+      ctx.quadraticCurveTo(tp2[1].x,tp2[1].y,tp2[2].x,tp2[2].y);
+    }
+    ctx.globalCompositeOperation='lighter';
+    ctx.strokeStyle=hcol(HS*0.55,0.10+0.14*bio,68);
+    ctx.lineWidth=tw*2.8;ctx.stroke();
+    ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=BRIGHT?hcol(HS*0.55,alp*0.62,36):'rgba(235,248,255,'+(alp*0.42)+')';
+    ctx.lineWidth=tw;ctx.stroke();
+  }
+  if(sp.tents.tip&&this.tents.length){
+    ctx.globalCompositeOperation='lighter';
+    for(var di=0;di<this.tents.length;di++){
+      var dpe=this.tents[di].pts[2];
+      var dr=size*0.05;
+      var dg=ctx.createRadialGradient(dpe.x,dpe.y,0,dpe.x,dpe.y,dr);
+      dg.addColorStop(0,rgb(0.50*alp+0.20*bio));
+      dg.addColorStop(1,rgb(0));
+      ctx.fillStyle=dg;
+      ctx.beginPath();ctx.arc(dpe.x,dpe.y,dr,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  /* ---- 4) 伞体：3D 立体光影 + 物种纹饰 ---- */
+  ctx.save();
+  ctx.translate(this.x,this.y);
+  ctx.rotate(th);
+  var w=wq*2;
+  var hh=size*0.85*this.bell;
+  var rimY=hh*0.02,rimArc=hh*0.23;
+  var phaseA=this.phase*6.283;
+  var edgeAmp=size*0.030*(0.55+0.45*Math.sin(this.phase*Math.PI));
+  var SCN=sp.scal[0],SCA=sp.scal[1];
+  var N=40;
+  /* 全局光源（左上）折算到伞体局部坐标 → 各只水母高光方向一致，立体感真实 */
+  var LGX=-0.42,LGY=-0.90;
+  var lx=LGX*Math.cos(th)+LGY*Math.sin(th);
+  var ly=-LGX*Math.sin(th)+LGY*Math.cos(th);
+  function rim(t){return rimY+rimArc*Math.cos(Math.PI*(t-0.5))+Math.sin(t*Math.PI*2*SCN+phaseA)*edgeAmp*SCA*Math.sin(t*Math.PI);}
+  function bellPath(){
+    ctx.beginPath();
+    ctx.moveTo(-w/2,rimY);
+    ctx.bezierCurveTo(-w/2,-hh*sp.dome,w/2,-hh*sp.dome,w/2,rimY);
+    for(var e=N;e>=0;e--){
+      var t=e/N;
+      ctx.lineTo((t-0.5)*w,rim(t));
+    }
+    ctx.closePath();
+  }
+  bellPath();
+  ctx.save();
+  ctx.clip();
+  /* 玻璃质感基底：受光面偏移（次表面散射近似） */
+  var g1=ctx.createRadialGradient(lx*w*0.30,-hh*(0.30+ly*0.10),w*0.04,lx*w*0.16,-hh*(0.22+ly*0.06),w*0.98);
+  g1.addColorStop(0,BRIGHT?hcol(0,alp*0.62,66):'rgba(250,253,255,'+(alp*0.80)+')');
+  g1.addColorStop(0.42,BRIGHT?hcol(HS*0.30,alp*0.42,62):'rgba(228,244,255,'+(alp*0.42)+')');
+  g1.addColorStop(0.78,hcol(HS*0.62,alp*0.26,60));
+  g1.addColorStop(1,hcol(HS*0.75,0,58));
+  ctx.fillStyle=g1;ctx.fillRect(-w,-hh,w*2,hh*1.6);
+  /* 体内荧光（次表面发光：物种色，随脉冲呼吸） */
+  ctx.globalCompositeOperation='lighter';
+  var g2=ctx.createRadialGradient(lx*w*0.14,-hh*(0.26+ly*0.08),0,lx*w*0.14,-hh*(0.26+ly*0.08),w*0.72);
+  g2.addColorStop(0,hcol(HS*0.50,0.08+0.16*bio+0.30*this.cFlash,64));
+  g2.addColorStop(1,rgb(0));
+  ctx.fillStyle=g2;ctx.fillRect(-w,-hh,w*2,hh*1.6);
+  ctx.globalCompositeOperation='source-over';
+  /* 纵向明暗（上亮下暗 → 立体） */
+  var lin=ctx.createLinearGradient(0,-hh*0.52,0,rimY+rimArc);
+  lin.addColorStop(0,'rgba(255,255,255,'+(alp*0.26)+')');
+  lin.addColorStop(0.45,'rgba(255,255,255,0)');
+  lin.addColorStop(1,'rgba(30,50,80,'+(alp*0.22)+')');
+  ctx.fillStyle=lin;ctx.fillRect(-w,-hh,w*2,hh*1.6);
+  /* 物种纹饰：辐纹（海荨麻/花帽/狮鬃） */
+  if(sp.stripes){
+    for(var s2=0;s2<sp.stripes;s2++){
+      var sa=(s2/sp.stripes)*Math.PI*2;
+      var sx=Math.sin(sa);
       ctx.beginPath();
-      ctx.moveTo(pts[k-1].x,pts[k-1].y);
-      ctx.lineTo(pts[k].x,pts[k].y);
-      ctx.strokeStyle='hsla('+hue+',80%,66%,'+(this.alpha*0.42*fade)+')';
-      ctx.lineWidth=Math.max(0.8,size*0.045*fade);
+      ctx.moveTo(sx*w*0.06,-hh*0.30);
+      ctx.quadraticCurveTo(sx*w*0.30,-hh*0.24,sx*w*0.46,rimY*0.8);
+      ctx.strokeStyle=hcol(HS*(s2+0.6)/sp.stripes,alp*0.20,62);
+      ctx.lineWidth=Math.max(1.2,size*0.022);
+      ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,'+(alp*0.12)+')';
+      ctx.lineWidth=Math.max(0.6,size*0.010);
       ctx.stroke();
     }
   }
-  /* 伞体 */
-  ctx.save();
-  ctx.translate(this.x,this.y);
-  ctx.rotate(this.heading-Math.PI/2);
-  var w=size*(0.92+0.08*this.bell);
-  var hh=size*0.60*this.bell;
-  /* 外发光 */
-  ctx.globalCompositeOperation='lighter';
-  var gg=ctx.createRadialGradient(0,-hh*0.5,0,0,-hh*0.5,w*1.05);
-  gg.addColorStop(0,'hsla('+hue+',90%,70%,'+(0.10*this.bell)+')');
-  gg.addColorStop(0.6,'hsla('+hue+',90%,60%,0.045)');
-  gg.addColorStop(1,'hsla('+hue+',90%,60%,0)');
-  ctx.fillStyle=gg;
-  ctx.beginPath();ctx.arc(0,-hh*0.5,w,0,Math.PI*2);ctx.fill();
-  ctx.globalCompositeOperation='source-over';
-  /* 钟形伞体 */
+  /* 物种纹饰：辐管（水晶水母） */
+  if(sp.canals){
+    for(var c2=0;c2<sp.canals;c2++){
+      var ca=(c2/sp.canals)*Math.PI*2;
+      var cx2=Math.sin(ca);
+      ctx.beginPath();
+      ctx.moveTo(cx2*w*0.05,-hh*0.32);
+      ctx.lineTo(cx2*w*0.46,rimY*0.85);
+      ctx.strokeStyle='rgba(240,252,255,'+(alp*0.16)+')';
+      ctx.lineWidth=Math.max(0.7,size*0.009);
+      ctx.stroke();
+    }
+  }
+  /* 物种纹饰：四叶马蹄形性腺（海月水母） */
+  if(sp.gonads){
+    for(var q=0;q<sp.gonads;q++){
+      var a=Math.PI/4+q*Math.PI/2;
+      var gx=Math.cos(a)*w*0.15*this.bell, gy=-hh*0.15+Math.sin(a)*w*0.15*this.bell;
+      var rr=size*(0.095+(q%2)*0.012)*this.bell;
+      ctx.beginPath();
+      ctx.arc(gx,gy,rr,a+1.15,a+Math.PI*2-1.15);
+      ctx.strokeStyle='rgba(255,255,255,'+(alp*0.52)+')';
+      ctx.lineWidth=Math.max(0.9,size*0.019);
+      ctx.stroke();
+    }
+  }
+  /* 物种纹饰：疣突荧光（夜光水母） */
+  if(this.warts.length){
+    ctx.globalCompositeOperation='lighter';
+    for(var w3=0;w3<this.warts.length;w3++){
+      var wt=this.warts[w3];
+      var wx=Math.sin(wt.a)*w*0.5*wt.r, wy=-hh*(0.10+0.42*(1-wt.r));
+      var wr=size*0.017*wt.s;
+      var wg=ctx.createRadialGradient(wx,wy,0,wx,wy,wr);
+      wg.addColorStop(0,hcol(HS*0.85,0.30*alp+0.18*bio,68));
+      wg.addColorStop(1,rgb(0));
+      ctx.fillStyle=wg;
+      ctx.beginPath();ctx.arc(wx,wy,wr,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+  /* 顶部镜面高光（朝向全局光源：3D 质感关键） */
   ctx.beginPath();
-  ctx.moveTo(-w/2,0);
-  ctx.bezierCurveTo(-w/2,-hh*1.25,w/2,-hh*1.25,w/2,0);
-  ctx.quadraticCurveTo(0,-hh*0.30,-w/2,0);
-  ctx.closePath();
-  var g=ctx.createRadialGradient(0,-hh*0.55,w*0.08,0,-hh*0.55,w*0.9);
-  g.addColorStop(0,'hsla('+hue+',90%,82%,'+(this.alpha*0.9)+')');
-  g.addColorStop(0.55,'hsla('+hue+',85%,64%,'+(this.alpha*0.55)+')');
-  g.addColorStop(1,'hsla('+hue+',80%,55%,0)');
-  ctx.fillStyle=g;ctx.fill();
-  ctx.strokeStyle='hsla('+hue+',95%,86%,'+(this.alpha*0.75)+')';
-  ctx.lineWidth=Math.max(0.7,size*0.025);ctx.stroke();
-  /* 内部放射纹 */
-  ctx.strokeStyle='hsla('+hue+',85%,85%,'+(this.alpha*0.22)+')';
-  ctx.lineWidth=Math.max(0.5,size*0.012);
-  for(var r=-1;r<=1;r+=0.5){
-    ctx.beginPath();
-    ctx.moveTo(r*w*0.14,0);
-    ctx.quadraticCurveTo(r*w*0.22,-hh*0.7,r*w*0.30,-hh*0.95);
-    ctx.stroke();
+  ctx.ellipse(lx*w*0.28,-hh*(0.30+ly*0.08),w*0.30,hh*0.10,Math.atan2(ly,lx)+Math.PI/2,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,'+(alp*0.55)+')';
+  ctx.fill();
+  /* 腔内下缘反光（胶质厚度） */
+  ctx.beginPath();
+  ctx.ellipse(0,hh*0.16,w*0.40,hh*0.09,0,0,Math.PI);
+  ctx.strokeStyle=BRIGHT?'rgba(255,255,255,'+(alp*0.55)+')':'rgba(235,248,255,'+(alp*0.34)+')';
+  ctx.lineWidth=Math.max(0.8,size*0.020);
+  ctx.stroke();
+  ctx.restore(); /* 结束 clip */
+  /* 多层描边：外柔边（体积感）+ 主体亮缘 */
+  bellPath();
+  ctx.strokeStyle=hcol(HS*0.42,alp*0.22,60);
+  ctx.lineWidth=Math.max(1.6,size*0.045);
+  ctx.stroke();
+  bellPath();
+  ctx.strokeStyle=BRIGHT?dk(alp*0.6):'rgba(255,255,255,'+(alp*0.46)+')';
+  ctx.lineWidth=Math.max(0.6,size*0.011);
+  ctx.stroke();
+  /* 裙边亮缘（透过伞体的光） */
+  ctx.beginPath();
+  for(var e2=N;e2>=0;e2--){
+    var t2=e2/N;
+    ctx.lineTo((t2-0.5)*w,rim(t2));
+  }
+  ctx.strokeStyle=BRIGHT?hcol(HS*0.60,alp*0.66,34):'rgba(240,250,255,'+(alp*0.58)+')';
+  ctx.lineWidth=Math.max(0.7,size*0.016);
+  ctx.stroke();
+  /* 伞缘荧光点（花帽/警报/水晶：沿伞缘呼吸发光） */
+  if(sp.rimDots){
+    ctx.globalCompositeOperation='lighter';
+    for(var r2=0;r2<sp.rimDots;r2++){
+      var rt=(r2+0.5)/sp.rimDots;
+      var rx=(rt-0.5)*w,ry2=rim(rt);
+      var rd=size*0.030;
+      var rgr=ctx.createRadialGradient(rx,ry2,0,rx,ry2,rd);
+      rgr.addColorStop(0,hcol(HS*0.90,0.35+0.30*bio,66));
+      rgr.addColorStop(1,rgb(0));
+      ctx.fillStyle=rgr;
+      ctx.beginPath();ctx.arc(rx,ry2,rd,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+  /* 警报蓝光（Atolla：遇险时伞缘爆发蓝色闪光环） */
+  if(sp.alarm&&this.flash>0){
+    ctx.globalCompositeOperation='lighter';
+    var fl=this.flash;
+    var ag=ctx.createRadialGradient(0,-hh*0.10,w*0.40,0,-hh*0.10,w*0.85);
+    ag.addColorStop(0,'rgba(70,160,255,0)');
+    ag.addColorStop(0.5,'rgba(80,175,255,'+(0.45*fl)+')');
+    ag.addColorStop(1,'rgba(70,160,255,0)');
+    ctx.fillStyle=ag;
+    ctx.beginPath();ctx.arc(0,-hh*0.10,w*0.85,0,Math.PI*2);ctx.fill();
+    ctx.globalCompositeOperation='source-over';
   }
   ctx.restore();
+  /* ---- 点击荧光涟漪（点击瞬间从伞体扩散的亮环） ---- */
+  if(this.cFlash>0){
+    var fr=1-this.cFlash;
+    ctx.globalCompositeOperation='lighter';
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,size*(0.42+1.15*fr),0,Math.PI*2);
+    ctx.strokeStyle=hcol(HS*0.20,0.55*this.cFlash,64);
+    ctx.lineWidth=Math.max(1.5,size*0.030)*this.cFlash;
+    ctx.stroke();
+    ctx.globalCompositeOperation='source-over';
+  }
+  /* ---- 选中指示环（旋转虚线，物种色） ---- */
+  if(selected===this){
+    ctx.save();
+    ctx.setLineDash([7,6]);
+    ctx.lineDashOffset=-elapsed*22;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,size*0.98,0,Math.PI*2);
+    ctx.strokeStyle=BRIGHT?dk(0.85):rgb(0.8);
+    ctx.lineWidth=Math.max(1.2,size*0.02);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
 };
 
 /* ---------- 画布与主循环 ---------- */
@@ -1586,11 +3329,28 @@ function fit(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 function build(){
-  var n=isSmall()?5:9;
+  var small=isSmall(),n=small?5:8,big=small?2:2;
   flock=[];
-  for(var i=0;i<n;i++)flock.push(new Jelly());
+  selected=null;press.j=null;press.sel=false;
+  for(var i=0;i<n;i++){
+    var sz=i<big?rand(small?80:96,small?96:120):rand(small?34:44,small?48:64);
+    var j=new Jelly(sz);
+    /* 大个体固定为近景（深度高 → 视觉大），其余远近随机 */
+    if(i<big){j.dz=rand(0.80,1);j.vs=j.size*(0.55+0.45*j.dz);}
+    flock.push(j);
+  }
+  flock.sort(function(a,b){return a.dz-b.dz;}); /* 远的先画（近的在上层，3D 纵深） */
 }
-var fpsAcc=0,fpsN=0,lastDrawT=0,lastRawT=0;
+/* 帧率恢复后补回一只远景水母（小、淡，出现在随机位置，不抢镜） */
+function addFarJelly(){
+  var small=isSmall();
+  var j=new Jelly(rand(small?34:44,small?48:64));
+  j.dz=rand(0.30,0.55);j.vs=j.size*(0.55+0.45*j.dz);
+  j.alpha=rand(0.42,0.58);
+  flock.push(j);
+  flock.sort(function(a,b){return a.dz-b.dz;});
+}
+var fpsAcc=0,fpsN=0,lastDrawT=0,lastRawT=0,perfSlow=0,perfFast=0;
 function frame(t){
   if(!running)return;
   rafId=requestAnimationFrame(frame);
@@ -1599,9 +3359,28 @@ function frame(t){
   var rawDt=(t-lastRawT)/1000;lastRawT=t;
   fpsAcc+=rawDt;fpsN++;
   if(fpsAcc>=2){
-    var avg=fpsN/fpsAcc;
-    if(avg<30&&flock.length>4)flock.length=Math.max(4,flock.length-2);
-    fpsAcc=0;fpsN=0;
+    var avg=fpsN/fpsAcc;fpsAcc=0;fpsN=0;
+    /* 自适应减员：仅开屏预热后、帧率持续偏低才轻量减员（有下限），帧率恢复后自动补回
+       —— 旧逻辑一次性裁到 4 只且永不恢复，会让人误以为「水母越看越少」 */
+    if(elapsed>6){
+      if(avg<26){perfSlow++;perfFast=0;}
+      else if(avg>45){perfFast++;perfSlow=0;}
+      else{perfSlow=0;perfFast=0;}
+      var fullN=isSmall()?5:8,floorN=isSmall()?4:5;
+      if(perfSlow>=2&&flock.length>floorN&&!selected){
+        flock.splice(0,Math.min(2,flock.length-floorN));  /* 每次只去掉最远 2 只 */
+        perfSlow=0;
+      }
+      if(perfFast>=5&&flock.length<fullN){
+        addFarJelly();                                     /* 帧率恢复：逐只补回远景 */
+        perfFast=0;
+      }
+    }
+  }
+  /* 长按 350ms：选中水母（可拖拽至任意位置） */
+  if(press.j&&!press.sel&&t-press.t0>=350){
+    press.sel=true;selected=press.j;selected.speed=0;
+    document.body.style.cursor='grabbing';
   }
   /* 水母层绘制上限约 30fps：慢速漂游视觉无差别，显著降低开销 */
   if(t-lastDrawT<32)return;
@@ -1610,6 +3389,19 @@ function frame(t){
   if(dt>0.1)dt=0.1;
   elapsed+=dt;
   ctx.clearRect(0,0,W,H);
+  /* 个体间软排斥：聚集但不重叠（避免多只叠成一团） */
+  for(var a1=0;a1<flock.length;a1++){
+    for(var b1=a1+1;b1<flock.length;b1++){
+      var A=flock[a1],B=flock[b1];
+      var dxp=B.x-A.x,dyp=B.y-A.y,dp=Math.sqrt(dxp*dxp+dyp*dyp)||0.01;
+      var minD=(A.size+B.size)*0.55;
+      if(dp<minD){
+        var push=(minD-dp)/dp*0.35;
+        if(A!==selected){A.x-=dxp*push;A.y-=dyp*push;}
+        if(B!==selected){B.x+=dxp*push;B.y+=dyp*push;}
+      }
+    }
+  }
   for(var i=0;i<flock.length;i++)flock[i].update(dt,elapsed);
   for(var j=0;j<flock.length;j++)flock[j].draw();
 }
@@ -1617,7 +3409,7 @@ function resume(){
   if(running)return;
   fit();
   if(!flock.length)build();
-  running=true;lastT=0;lastDrawT=0;lastRawT=0;fpsAcc=0;fpsN=0;
+  running=true;lastT=0;lastDrawT=0;lastRawT=0;fpsAcc=0;fpsN=0;perfSlow=0;perfFast=0;
   rafId=requestAnimationFrame(frame);
   document.body.classList.add('fx-on');
   fxBtn.classList.add('active');
@@ -1626,6 +3418,7 @@ function resume(){
 function pause(){
   running=false;
   if(rafId)cancelAnimationFrame(rafId);rafId=0;
+  dropSel();press.j=null;
   ctx.clearRect(0,0,W,H);
   document.body.classList.remove('fx-on');
   fxBtn.classList.remove('active');
@@ -1657,22 +3450,81 @@ if(mqReduce&&mqReduce.addEventListener){
   });
 }
 
-/* ---------- 输入（鼠标/触摸） ---------- */
+/* ---------- 输入（鼠标/触摸）：点击水母荧光闪烁 / 长按选中拖拽 ---------- */
+var swallow=false;
 window.addEventListener('mousemove',function(e){
   pointer.x=e.clientX;pointer.y=e.clientY;pointer.active=true;
+  if(!running||selected)return;
+  /* 悬停水母上给手型光标，提升可交互发现性 */
+  document.body.style.cursor=hitJelly(e.clientX,e.clientY)?'pointer':'';
 });
-document.documentElement.addEventListener('mouseleave',function(){pointer.active=false;});
-window.addEventListener('blur',function(){pointer.active=false;});
+window.addEventListener('mousedown',function(e){
+  if(!running)return;
+  /* 底层是可交互元素（按钮/链接/输入）时页面控件优先，不做水母交互，避免误吞点击 */
+  var el=e.target;
+  if(el&&el.closest&&el.closest('a,button,input,textarea,select,label,iframe,[contenteditable],[role="button"]')){press.j=null;return;}
+  var j=hitJelly(e.clientX,e.clientY);
+  if(j){
+    press.j=j;press.t0=performance.now();press.sel=false;
+    press.mx=e.clientX;press.my=e.clientY;
+    swallow=true;
+    e.preventDefault(); /* 防止点击穿透聚焦下层输入框 */
+  }else{
+    press.j=null;
+  }
+},true);
+/* 吞掉落在水母上的点击：避免误触下层按钮/链接 */
+window.addEventListener('click',function(e){
+  if(swallow){e.stopPropagation();e.preventDefault();swallow=false;}
+},true);
+window.addEventListener('mouseup',function(){
+  if(press.j){
+    if(press.sel)dropSel();   /* 松手 = 放下，原地继续漫游 */
+    else press.j.cFlash=1;    /* 短按 = 点击荧光闪烁 */
+    press.j=null;
+  }
+  if(!selected)document.body.style.cursor='';
+});
+document.documentElement.addEventListener('mouseleave',function(){
+  pointer.active=false;
+  if(press.sel)dropSel();
+  press.j=null;
+});
+window.addEventListener('blur',function(){
+  pointer.active=false;
+  if(press.sel)dropSel();
+  press.j=null;
+});
 window.addEventListener('touchstart',function(e){
   var t=e.touches[0];if(!t)return;
   pointer.x=t.clientX;pointer.y=t.clientY;pointer.active=true;
+  if(running){
+    /* 同鼠标：页面可交互元素优先 */
+    var el=e.target;
+    var ui=el&&el.closest&&el.closest('a,button,input,textarea,select,label,iframe,[contenteditable],[role="button"]');
+    if(!ui){
+      var j=hitJelly(t.clientX,t.clientY);
+      if(j){
+        press.j=j;press.t0=performance.now();press.sel=false;
+        press.mx=t.clientX;press.my=t.clientY;
+      }
+    }
+  }
   if(touchTimer)clearTimeout(touchTimer);
 },{passive:true});
 window.addEventListener('touchmove',function(e){
   var t=e.touches[0];if(!t)return;
   pointer.x=t.clientX;pointer.y=t.clientY;pointer.active=true;
-},{passive:true});
+  /* 按住未选中时移动超过 12px：判定为滚动页面，取消本次交互 */
+  if(press.j&&!press.sel&&Math.hypot(t.clientX-press.mx,t.clientY-press.my)>12)press.j=null;
+  if(selected)e.preventDefault(); /* 拖拽中阻止页面滚动 */
+},{passive:false});
 window.addEventListener('touchend',function(){
+  if(press.j){
+    if(press.sel)dropSel();
+    else press.j.cFlash=1;
+    press.j=null;
+  }
   if(touchTimer)clearTimeout(touchTimer);
   touchTimer=setTimeout(function(){pointer.active=false;},3000);
 });
