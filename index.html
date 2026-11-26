@@ -2731,9 +2731,23 @@ function rand(a,b){return a+Math.random()*(b-a);}
 function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 function normAng(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
 
-/* ---------- 交互状态：点击闪烁 / 长按选中拖拽 ---------- */
+/* ---------- 交互状态：点击闪烁 / 长按选中拖拽 / 连击召唤 ---------- */
 var press={j:null,t0:0,sel:false,mx:0,my:0};
 var selected=null;
+/* 连击召唤：2s 内非 UI 点击 ≥3 次 → 水母加速冲向最后点击点（6s） */
+var summon={x:0,y:0},summonT=0,lastSummon=-1e4,clickTimes=[],summonFx=[];
+function registerClick(x,y){
+  var now=performance.now();
+  clickTimes.push(now);
+  while(clickTimes.length&&now-clickTimes[0]>2000)clickTimes.shift();
+  if(clickTimes.length>=3&&now-lastSummon>3500){
+    lastSummon=now;
+    summon.x=x;summon.y=y;summonT=6;
+    summonFx.push({x:x,y:y,t:0});
+    for(var i=0;i<flock.length;i++)flock[i].cFlash=Math.max(flock[i].cFlash,0.30);
+    clickTimes=[];
+  }
+}
 /* 命中检测：伞体椭圆 + 触须拖尾区（从最上层往下找） */
 function hitJelly(px,py){
   for(var i=flock.length-1;i>=0;i--){
@@ -2836,6 +2850,9 @@ function Jelly(size){
 }
 Jelly.prototype.update=function(dt,time){
   var small=isSmall(),SP=this.sp.mv,ring=(small?90:120)+this.size*0.45;
+  var sum=summonT>0;                       /* 连击召唤中：追召唤点、更紧、更快 */
+  if(sum){ring*=0.60;}
+  var tx=sum?summon.x:pointer.x,ty=sum?summon.y:pointer.y;
   /* ---- 物种搏动节律：快收慢舒（真实水母搏动波形），频率随物种 ---- */
   this.phase+=dt*SP.freq*(small?0.85:1);
   var impulse=false;
@@ -2847,16 +2864,16 @@ Jelly.prototype.update=function(dt,time){
 
   /* ---- 期望朝向：跟随鼠标 / 沿当前朝向延续的柔和漫游 ---- */
   var want;
-  if(pointer.active){
-    var dx=pointer.x-this.x,dy=pointer.y-this.y;
+  if(pointer.active||sum){
+    var dx=tx-this.x,dy=ty-this.y;
     var dist=Math.sqrt(dx*dx+dy*dy);
     if(dist>ring){
       want=Math.atan2(dy,dx);
     }else{
-      /* 聚集完成：围绕鼠标缓慢公转，避免叠成一个点 */
-      this.ringA+=dt*0.9;
+      /* 聚集完成：围绕目标缓慢公转，避免叠成一个点；召唤时公转更活跃 */
+      this.ringA+=dt*(sum?1.6:0.9);
       var rg=ring*(0.55+0.30*Math.sin(this.ringA*1.3));
-      want=Math.atan2(pointer.y+Math.sin(this.ringA)*rg*0.72-this.y,pointer.x+Math.cos(this.ringA)*rg-this.x);
+      want=Math.atan2(ty+Math.sin(this.ringA)*rg*0.72-this.y,tx+Math.cos(this.ringA)*rg-this.x);
     }
   }else{
     this.wanderT-=dt;
@@ -2878,15 +2895,16 @@ Jelly.prototype.update=function(dt,time){
   /* ---- 冲量：搏动收缩起始施加；推力与峰值速度按物种限制 ---- */
   if(impulse){
     var sp2;
-    if(pointer.active){
-      var d2=Math.sqrt((pointer.x-this.x)*(pointer.x-this.x)+(pointer.y-this.y)*(pointer.y-this.y));
-      sp2=d2>ring?clamp(40+d2*0.5,40,190):rand(10,26);
+    if(pointer.active||sum){
+      var d2=Math.sqrt((tx-this.x)*(tx-this.x)+(ty-this.y)*(ty-this.y));
+      sp2=d2>ring?(sum?clamp(70+d2*0.75,70,240):clamp(40+d2*0.5,40,190)):rand(10,26);
     }else{
       sp2=rand(30,50);
     }
     sp2*=SP.amp*rand(0.85,1.15);
-    /* 漫游限速保持物种习性的慢速；追鼠标时按 chase 系数放宽峰值，保证聚拢及时 */
-    var cap=pointer.active?SP.maxSp*(SP.chase||1.5):SP.maxSp;
+    /* 漫游限速保持物种习性慢速；追鼠标按 chase 放宽峰值；召唤再×1.7 急速冲集 */
+    var cap=(pointer.active||sum)?SP.maxSp*(SP.chase||1.5):SP.maxSp;
+    if(sum)cap*=1.7;
     this.speed=Math.min(this.speed+sp2,cap);
   }
   /* 滑行衰减（物种差异：花帽急停、狮鬃长滑）+ 深度视差 */
@@ -3388,7 +3406,32 @@ function frame(t){
   if(!dt||dt<=0)return;
   if(dt>0.1)dt=0.1;
   elapsed+=dt;
+  if(summonT>0)summonT-=dt;
   ctx.clearRect(0,0,W,H);
+  /* ---- 连击召唤：聚集中心脉动光晕 + 点击处扩散涟漪（水母之下层） ---- */
+  if(summonT>0){
+    var sFade=Math.min(1,summonT/1.5);
+    var sPul=0.5+0.5*Math.sin(elapsed*6);
+    var sg=ctx.createRadialGradient(summon.x,summon.y,0,summon.x,summon.y,46+10*sPul);
+    sg.addColorStop(0,'rgba(120,220,255,'+(0.14*sFade*(0.6+0.4*sPul))+')');
+    sg.addColorStop(1,'rgba(120,220,255,0)');
+    ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=sg;
+    ctx.beginPath();ctx.arc(summon.x,summon.y,56,0,Math.PI*2);ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+  }
+  for(var sfi=summonFx.length-1;sfi>=0;sfi--){
+    var sf=summonFx[sfi];
+    sf.t+=dt;
+    if(sf.t>=0.9){summonFx.splice(sfi,1);continue;}
+    var sa=1-sf.t/0.9;
+    var BR=document.body.className.indexOf('mood-bright')>=0;
+    var cA=BR?'rgba(14,120,130,':'rgba(140,220,255,';
+    ctx.beginPath();ctx.arc(sf.x,sf.y,18+sf.t*230,0,Math.PI*2);
+    ctx.strokeStyle=cA+(0.5*sa)+')';ctx.lineWidth=2.5*sa+0.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(sf.x,sf.y,9+sf.t*135,0,Math.PI*2);
+    ctx.strokeStyle=(BR?'rgba(20,140,150,':'rgba(210,240,255,')+(0.3*sa)+')';ctx.lineWidth=1.2;ctx.stroke();
+  }
   /* 个体间软排斥：聚集但不重叠（避免多只叠成一团） */
   for(var a1=0;a1<flock.length;a1++){
     for(var b1=a1+1;b1<flock.length;b1++){
@@ -3463,6 +3506,7 @@ window.addEventListener('mousedown',function(e){
   /* 底层是可交互元素（按钮/链接/输入）时页面控件优先，不做水母交互，避免误吞点击 */
   var el=e.target;
   if(el&&el.closest&&el.closest('a,button,input,textarea,select,label,iframe,[contenteditable],[role="button"]')){press.j=null;return;}
+  registerClick(e.clientX,e.clientY);
   var j=hitJelly(e.clientX,e.clientY);
   if(j){
     press.j=j;press.t0=performance.now();press.sel=false;
@@ -3503,6 +3547,7 @@ window.addEventListener('touchstart',function(e){
     var el=e.target;
     var ui=el&&el.closest&&el.closest('a,button,input,textarea,select,label,iframe,[contenteditable],[role="button"]');
     if(!ui){
+      registerClick(t.clientX,t.clientY);
       var j=hitJelly(t.clientX,t.clientY);
       if(j){
         press.j=j;press.t0=performance.now();press.sel=false;
